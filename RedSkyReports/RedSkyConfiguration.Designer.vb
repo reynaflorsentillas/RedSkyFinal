@@ -33,6 +33,8 @@ Partial Class RedSkyConfiguration
         Me.cboMonthlyStatus = New System.Windows.Forms.ComboBox()
         Me.dtMonthly = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.lblWeeklyDay = New System.Windows.Forms.Label()
+        Me.cboWeeklyDay = New System.Windows.Forms.ComboBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.lblWeeklyGenerationTime = New System.Windows.Forms.Label()
         Me.lblWeeklyNextReport = New System.Windows.Forms.Label()
@@ -40,6 +42,10 @@ Partial Class RedSkyConfiguration
         Me.cboWeeklyStatus = New System.Windows.Forms.ComboBox()
         Me.dtWeekly = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.lblDailyTo = New System.Windows.Forms.Label()
+        Me.lblDailyFrom = New System.Windows.Forms.Label()
+        Me.dtDailyTo = New System.Windows.Forms.DateTimePicker()
+        Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.lblDailyGenerationTime = New System.Windows.Forms.Label()
         Me.lblDailyNextReport = New System.Windows.Forms.Label()
@@ -73,12 +79,11 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListStatus = New System.Windows.Forms.Label()
         Me.lblMailingListEmailAddress = New System.Windows.Forms.Label()
         Me.gvMailingList = New System.Windows.Forms.DataGridView()
-        Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
-        Me.dtDailyTo = New System.Windows.Forms.DateTimePicker()
-        Me.lblDailyFrom = New System.Windows.Forms.Label()
-        Me.lblDailyTo = New System.Windows.Forms.Label()
-        Me.lblWeeklyDay = New System.Windows.Forms.Label()
-        Me.cboWeeklyDay = New System.Windows.Forms.ComboBox()
+        Me.TabPage4 = New System.Windows.Forms.TabPage()
+        Me.lblOtherConfigurationConfigName = New System.Windows.Forms.Label()
+        Me.txtOtherConfigurationConfigValue = New System.Windows.Forms.TextBox()
+        Me.btnOtherConfigurationSave = New System.Windows.Forms.Button()
+        Me.lblOtherConfigurationConfigId = New System.Windows.Forms.Label()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -87,6 +92,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage2.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TabPage4.SuspendLayout()
         Me.SuspendLayout()
         '
         'TabControl1
@@ -94,6 +100,7 @@ Partial Class RedSkyConfiguration
         Me.TabControl1.Controls.Add(Me.TabPage1)
         Me.TabControl1.Controls.Add(Me.TabPage2)
         Me.TabControl1.Controls.Add(Me.TabPage3)
+        Me.TabControl1.Controls.Add(Me.TabPage4)
         Me.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TabControl1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
@@ -217,6 +224,24 @@ Partial Class RedSkyConfiguration
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Weekly Summary Report"
         '
+        'lblWeeklyDay
+        '
+        Me.lblWeeklyDay.AutoSize = True
+        Me.lblWeeklyDay.Location = New System.Drawing.Point(14, 39)
+        Me.lblWeeklyDay.Name = "lblWeeklyDay"
+        Me.lblWeeklyDay.Size = New System.Drawing.Size(126, 18)
+        Me.lblWeeklyDay.TabIndex = 7
+        Me.lblWeeklyDay.Text = "Day of Generation: "
+        '
+        'cboWeeklyDay
+        '
+        Me.cboWeeklyDay.FormattingEnabled = True
+        Me.cboWeeklyDay.Items.AddRange(New Object() {"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"})
+        Me.cboWeeklyDay.Location = New System.Drawing.Point(152, 31)
+        Me.cboWeeklyDay.Name = "cboWeeklyDay"
+        Me.cboWeeklyDay.Size = New System.Drawing.Size(147, 26)
+        Me.cboWeeklyDay.TabIndex = 6
+        '
         'Label4
         '
         Me.Label4.AutoSize = True
@@ -291,6 +316,42 @@ Partial Class RedSkyConfiguration
         Me.GroupBox1.TabIndex = 0
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Daily Summary Report"
+        '
+        'lblDailyTo
+        '
+        Me.lblDailyTo.AutoSize = True
+        Me.lblDailyTo.Location = New System.Drawing.Point(341, 66)
+        Me.lblDailyTo.Name = "lblDailyTo"
+        Me.lblDailyTo.Size = New System.Drawing.Size(63, 18)
+        Me.lblDailyTo.TabIndex = 9
+        Me.lblDailyTo.Text = "Daily To: "
+        '
+        'lblDailyFrom
+        '
+        Me.lblDailyFrom.AutoSize = True
+        Me.lblDailyFrom.Location = New System.Drawing.Point(323, 32)
+        Me.lblDailyFrom.Name = "lblDailyFrom"
+        Me.lblDailyFrom.Size = New System.Drawing.Size(81, 18)
+        Me.lblDailyFrom.TabIndex = 8
+        Me.lblDailyFrom.Text = "Daily From: "
+        '
+        'dtDailyTo
+        '
+        Me.dtDailyTo.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtDailyTo.Location = New System.Drawing.Point(410, 60)
+        Me.dtDailyTo.Name = "dtDailyTo"
+        Me.dtDailyTo.ShowUpDown = True
+        Me.dtDailyTo.Size = New System.Drawing.Size(163, 26)
+        Me.dtDailyTo.TabIndex = 7
+        '
+        'dtDailyFrom
+        '
+        Me.dtDailyFrom.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtDailyFrom.Location = New System.Drawing.Point(410, 26)
+        Me.dtDailyFrom.Name = "dtDailyFrom"
+        Me.dtDailyFrom.ShowUpDown = True
+        Me.dtDailyFrom.Size = New System.Drawing.Size(163, 26)
+        Me.dtDailyFrom.TabIndex = 6
         '
         'Label2
         '
@@ -372,7 +433,7 @@ Partial Class RedSkyConfiguration
         'cboSMTPUseTLSSSL
         '
         Me.cboSMTPUseTLSSSL.FormattingEnabled = True
-        Me.cboSMTPUseTLSSSL.Items.AddRange(New Object() {"YES", "NO"})
+        Me.cboSMTPUseTLSSSL.Items.AddRange(New Object() {"TRUE", "FALSE"})
         Me.cboSMTPUseTLSSSL.Location = New System.Drawing.Point(268, 177)
         Me.cboSMTPUseTLSSSL.Name = "cboSMTPUseTLSSSL"
         Me.cboSMTPUseTLSSSL.Size = New System.Drawing.Size(247, 26)
@@ -420,9 +481,9 @@ Partial Class RedSkyConfiguration
         Me.lblSMTPUseTLSSSL.AutoSize = True
         Me.lblSMTPUseTLSSSL.Location = New System.Drawing.Point(54, 180)
         Me.lblSMTPUseTLSSSL.Name = "lblSMTPUseTLSSSL"
-        Me.lblSMTPUseTLSSSL.Size = New System.Drawing.Size(161, 18)
+        Me.lblSMTPUseTLSSSL.Size = New System.Drawing.Size(110, 18)
         Me.lblSMTPUseTLSSSL.TabIndex = 9
-        Me.lblSMTPUseTLSSSL.Text = "SMTP Security (TLS/SSL): "
+        Me.lblSMTPUseTLSSSL.Text = "SMTP Enable SSL"
         '
         'lblSMTPPortSSL
         '
@@ -625,68 +686,62 @@ Partial Class RedSkyConfiguration
         Me.gvMailingList.Size = New System.Drawing.Size(616, 338)
         Me.gvMailingList.TabIndex = 0
         '
-        'dtDailyFrom
+        'TabPage4
         '
-        Me.dtDailyFrom.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtDailyFrom.Location = New System.Drawing.Point(410, 26)
-        Me.dtDailyFrom.Name = "dtDailyFrom"
-        Me.dtDailyFrom.ShowUpDown = True
-        Me.dtDailyFrom.Size = New System.Drawing.Size(163, 26)
-        Me.dtDailyFrom.TabIndex = 6
+        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationConfigId)
+        Me.TabPage4.Controls.Add(Me.btnOtherConfigurationSave)
+        Me.TabPage4.Controls.Add(Me.txtOtherConfigurationConfigValue)
+        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationConfigName)
+        Me.TabPage4.Location = New System.Drawing.Point(4, 27)
+        Me.TabPage4.Name = "TabPage4"
+        Me.TabPage4.Size = New System.Drawing.Size(616, 439)
+        Me.TabPage4.TabIndex = 3
+        Me.TabPage4.Text = "Other Configuration"
+        Me.TabPage4.UseVisualStyleBackColor = True
         '
-        'dtDailyTo
+        'lblOtherConfigurationConfigName
         '
-        Me.dtDailyTo.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtDailyTo.Location = New System.Drawing.Point(410, 60)
-        Me.dtDailyTo.Name = "dtDailyTo"
-        Me.dtDailyTo.ShowUpDown = True
-        Me.dtDailyTo.Size = New System.Drawing.Size(163, 26)
-        Me.dtDailyTo.TabIndex = 7
+        Me.lblOtherConfigurationConfigName.AutoSize = True
+        Me.lblOtherConfigurationConfigName.Location = New System.Drawing.Point(13, 18)
+        Me.lblOtherConfigurationConfigName.Name = "lblOtherConfigurationConfigName"
+        Me.lblOtherConfigurationConfigName.Size = New System.Drawing.Size(117, 18)
+        Me.lblOtherConfigurationConfigName.TabIndex = 0
+        Me.lblOtherConfigurationConfigName.Text = "Reports Location: "
         '
-        'lblDailyFrom
+        'txtOtherConfigurationConfigValue
         '
-        Me.lblDailyFrom.AutoSize = True
-        Me.lblDailyFrom.Location = New System.Drawing.Point(323, 32)
-        Me.lblDailyFrom.Name = "lblDailyFrom"
-        Me.lblDailyFrom.Size = New System.Drawing.Size(81, 18)
-        Me.lblDailyFrom.TabIndex = 8
-        Me.lblDailyFrom.Text = "Daily From: "
+        Me.txtOtherConfigurationConfigValue.Location = New System.Drawing.Point(136, 15)
+        Me.txtOtherConfigurationConfigValue.Name = "txtOtherConfigurationConfigValue"
+        Me.txtOtherConfigurationConfigValue.Size = New System.Drawing.Size(462, 26)
+        Me.txtOtherConfigurationConfigValue.TabIndex = 1
         '
-        'lblDailyTo
+        'btnOtherConfigurationSave
         '
-        Me.lblDailyTo.AutoSize = True
-        Me.lblDailyTo.Location = New System.Drawing.Point(341, 66)
-        Me.lblDailyTo.Name = "lblDailyTo"
-        Me.lblDailyTo.Size = New System.Drawing.Size(63, 18)
-        Me.lblDailyTo.TabIndex = 9
-        Me.lblDailyTo.Text = "Daily To: "
+        Me.btnOtherConfigurationSave.Location = New System.Drawing.Point(481, 47)
+        Me.btnOtherConfigurationSave.Name = "btnOtherConfigurationSave"
+        Me.btnOtherConfigurationSave.Size = New System.Drawing.Size(117, 39)
+        Me.btnOtherConfigurationSave.TabIndex = 2
+        Me.btnOtherConfigurationSave.Text = "Save"
+        Me.btnOtherConfigurationSave.UseVisualStyleBackColor = True
         '
-        'lblWeeklyDay
+        'lblOtherConfigurationConfigId
         '
-        Me.lblWeeklyDay.AutoSize = True
-        Me.lblWeeklyDay.Location = New System.Drawing.Point(14, 39)
-        Me.lblWeeklyDay.Name = "lblWeeklyDay"
-        Me.lblWeeklyDay.Size = New System.Drawing.Size(126, 18)
-        Me.lblWeeklyDay.TabIndex = 7
-        Me.lblWeeklyDay.Text = "Day of Generation: "
+        Me.lblOtherConfigurationConfigId.AutoSize = True
+        Me.lblOtherConfigurationConfigId.Location = New System.Drawing.Point(16, 72)
+        Me.lblOtherConfigurationConfigId.Name = "lblOtherConfigurationConfigId"
+        Me.lblOtherConfigurationConfigId.Size = New System.Drawing.Size(48, 18)
+        Me.lblOtherConfigurationConfigId.TabIndex = 3
+        Me.lblOtherConfigurationConfigId.Text = "Label1"
+        Me.lblOtherConfigurationConfigId.Visible = False
         '
-        'cboWeeklyDay
-        '
-        Me.cboWeeklyDay.FormattingEnabled = True
-        Me.cboWeeklyDay.Items.AddRange(New Object() {"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"})
-        Me.cboWeeklyDay.Location = New System.Drawing.Point(152, 31)
-        Me.cboWeeklyDay.Name = "cboWeeklyDay"
-        Me.cboWeeklyDay.Size = New System.Drawing.Size(147, 26)
-        Me.cboWeeklyDay.TabIndex = 6
-        '
-        'Form1
+        'RedSkyConfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(624, 470)
         Me.Controls.Add(Me.TabControl1)
         Me.MaximizeBox = False
-        Me.Name = "Form1"
+        Me.Name = "RedSkyConfiguration"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "  RedSky Configuration"
         Me.TabControl1.ResumeLayout(False)
@@ -702,6 +757,8 @@ Partial Class RedSkyConfiguration
         Me.TabPage3.ResumeLayout(False)
         Me.TabPage3.PerformLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TabPage4.ResumeLayout(False)
+        Me.TabPage4.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -763,4 +820,9 @@ Partial Class RedSkyConfiguration
     Friend WithEvents dtDailyFrom As DateTimePicker
     Friend WithEvents lblWeeklyDay As Label
     Friend WithEvents cboWeeklyDay As ComboBox
+    Friend WithEvents TabPage4 As TabPage
+    Friend WithEvents btnOtherConfigurationSave As Button
+    Friend WithEvents txtOtherConfigurationConfigValue As TextBox
+    Friend WithEvents lblOtherConfigurationConfigName As Label
+    Friend WithEvents lblOtherConfigurationConfigId As Label
 End Class

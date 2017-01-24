@@ -3,6 +3,7 @@ Imports System.Data.SqlClient
 Imports System.Configuration
 Imports Excel = Microsoft.Office.Interop.Excel
 Imports System.Net.Mail
+Imports System.IO
 
 Public Class RedSkyMain
     Dim connectionString As String = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
@@ -14,10 +15,13 @@ Public Class RedSkyMain
 
     Dim SMTPServer As String
     Dim SMTPPort As String
+    Dim SMTPUseSSL As Boolean
     Dim SMTPUsername As String
     Dim SMTPPassword As String
 
     Dim mailingList As New Dictionary(Of String, String)
+
+    Dim reportsLocation As String
 
     'Dim dailyStatus As String
     Dim dailyGeneration As DateTime
@@ -35,6 +39,7 @@ Public Class RedSkyMain
     Private Sub RedSkyMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         GetReportConfiguration()
         GetMailingConfiguration()
+        GetOtherConfiguration()
         SetRunStatus("STOP")
     End Sub
 
@@ -117,7 +122,7 @@ Public Class RedSkyMain
     End Sub
 
     Private Sub btnRunReports_Click(sender As Object, e As EventArgs) Handles btnRunReports.Click
-        timer.Interval = 30000 ' 1 minute
+        timer.Interval = 60000 ' 1 minute
         AddHandler timer.Elapsed, AddressOf Me.OnTimer
         timer.Start()
         SetRunStatus("RUN")
@@ -150,9 +155,13 @@ Public Class RedSkyMain
 
     Private Sub GenerateDaily(dateFrom As DateTime, dateTo As DateTime, dateGenerated As DateTime)
         Dim generated As Boolean = False
-        Dim filePath As String = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+        Dim filePath As String = reportsLocation & "\RedSky\Daily\"
         Dim fileName As String = ""
         Dim seats As Integer = 0
+
+        If Not Directory.Exists(filePath) Then
+            Directory.CreateDirectory(filePath)
+        End If
 
         If lblDailyStatus.Text = "ENABLED" Then
             Try
@@ -202,7 +211,11 @@ Public Class RedSkyMain
 
                         fileName = "DailyReport" & dateGenerated.ToString("ddmmyyyy") & ".xlsx"
 
-                        xlWorksheet.SaveAs(filePath & "\" & fileName)
+                        If File.Exists(filePath & fileName) Then
+                            File.Delete(filePath & fileName)
+                        End If
+
+                        xlWorksheet.SaveAs(filePath & fileName)
 
                         xlWorkbook.Close()
                         xlApp.Quit()
@@ -236,13 +249,9 @@ Public Class RedSkyMain
             Dim subject As String
             subject = "RedSky Daily Report " & today.ToShortDateString
             Dim body As String
-            body = "Hi, " + vbNewLine + vbNewLine +
-                "Today, your number of seats utilized are: " + seats + vbNewLine +
-                "Please see attched file for more details." + vbNewLine + vbNewLine +
-                "Best Regards," + vbNewLine +
-                "Capstone Solutions Inc."
+            body = "Hi, <br><br> Today, your number of seats utilized are: " & seats.ToString & " <br>Please see attched file for more details. <br><br>Best Regards, <br>Capstone Solutions Inc."
             Dim attachment As String
-            attachment = filePath & "\" & fileName
+            attachment = filePath & fileName
             AutomaticEmail(subject, SMTPUsername, "reynaflorsentillas.rs@gmail.com", body, attachment)
         End If
     End Sub
@@ -266,6 +275,7 @@ Public Class RedSkyMain
                     reportType = reader.GetValue(1).ToString
                     SMTPServer = reader.GetValue(1).ToString
                     SMTPPort = reader.GetValue(2).ToString
+                    SMTPUseSSL = Convert.ToBoolean(reader.GetValue(3)).ToString
                     SMTPUsername = reader.GetValue(4).ToString
                     SMTPPassword = reader.GetValue(5).ToString
                 Loop
@@ -313,24 +323,53 @@ Public Class RedSkyMain
             mail.Priority = MailPriority.High
             mail.IsBodyHtml = True
 
-            'Dim MsgAttach As New Attachment(Application.StartupPath() + "\Upload\Sample.xml")
-            'MailMsg.Attachments.Add(MsgAttach)
+            If File.Exists(attachment) Then
+                Dim mailAttach As New Attachment(attachment)
+                mail.Attachments.Add(mailAttach)
+            End If
 
             Dim smtpMail As New SmtpClient(SMTPServer)
             smtpMail.Port = SMTPPort
+            smtpMail.DeliveryMethod = SmtpDeliveryMethod.Network
             smtpMail.UseDefaultCredentials = False
             smtpMail.Credentials = New System.Net.NetworkCredential(SMTPUsername, SMTPPassword)
-            smtpMail.EnableSsl = True
-            smtpMail.Timeout = 20000
+            smtpMail.EnableSsl = SMTPUseSSL
+            smtpMail.Timeout = 60000
             smtpMail.Send(mail)
             MsgBox("Email Sent.", MsgBoxStyle.Information, "Automatic Email")
         Catch ex As Exception
-            MsgBox("Error while sending mail.", MsgBoxStyle.Exclamation, "Automatic Email")
+            MsgBox("Error while sending mail." + ex.Message, MsgBoxStyle.Exclamation, "Automatic Email")
+        End Try
+    End Sub
+
+    Private Sub GetOtherConfiguration()
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
+            cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                Do While reader.Read
+                    reportsLocation = reader.GetValue(2).ToString
+                Loop
+            End If
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        Catch ex As Exception
+            MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
+            conn.Close()
+            conn.Dispose()
         End Try
     End Sub
 
     Private Sub btnReloadConfiguration_Click(sender As Object, e As EventArgs) Handles btnReloadConfiguration.Click
         GetReportConfiguration()
+        GetMailingConfiguration()
+        GetOtherConfiguration()
+        SetRunStatus("STOP")
     End Sub
 
     Private Sub btnStopReports_Click(sender As Object, e As EventArgs) Handles btnStopReports.Click
