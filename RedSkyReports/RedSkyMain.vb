@@ -213,9 +213,9 @@ Public Class RedSkyMain
 
                         generated = True
 
-                        MsgBox("Successfully generated report.", MsgBoxStyle.Information, "Daily Report")
+                        'MsgBox("Successfully generated report.", MsgBoxStyle.Information, "Daily Report")
                     Catch ex As Exception
-                        MsgBox("Error generating report. " & ex.Message, MsgBoxStyle.Exclamation, "Daily Report")
+                        'MsgBox("Error generating report. " & ex.Message, MsgBoxStyle.Exclamation, "Daily Report")
                     End Try
                     'Else
                     'MsgBox("No Data! " & dateFrom & " " & dateTo)
