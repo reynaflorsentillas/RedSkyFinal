@@ -21,26 +21,35 @@ Public Class RedSkyMain
 
     Dim mailingList As New Dictionary(Of String, String)
 
-    Dim reportsLocation As String
+    'Dim reportsLocation As String
 
     'Dim dailyStatus As String
     Dim dailyGeneration As DateTime
     Dim dailyFrom As DateTime
     Dim dailyTo As DateTime
+    Dim dailyLastGeneration As DateTime
 
     'Dim weeklyStatus As String
     Dim weeklyGeneration As DateTime
+    Dim weeklyGenerationDay As String
+    Dim weeklyLastGeneration As DateTime
 
     'Dim monthlyStatus As String
     Dim monthlyGeneration As DateTime
+    Dim monthlyLastGeneration As DateTime
 
     Dim today As DateTime
 
     Private Sub RedSkyMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         GetReportConfiguration()
         GetMailingConfiguration()
-        GetOtherConfiguration()
+        'GetOtherConfiguration()
+        GetMailingList()
         SetRunStatus("STOP")
+        btnStopReports.Enabled = False
+        btnConfiguration.Enabled = True
+        btnReloadConfiguration.Enabled = True
+        btnRunReports.Enabled = True
     End Sub
 
     Private Sub GetReportConfiguration()
@@ -62,25 +71,30 @@ Public Class RedSkyMain
                         'dailyStatus = reader.GetValue(5).ToString
                         dailyFrom = reader.GetValue(6)
                         dailyTo = reader.GetValue(7)
+                        dailyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
                     End If
 
                     If reportType = "Weekly" Then
                         weeklyGeneration = reader.GetDateTime(2)
                         'weeklyStatus = reader.GetValue(5).ToString
+                        weeklyGenerationDay = reader.GetValue(8).ToString
                         lblWeeklyStatus.Text = reader.GetValue(5).ToString
+                        weeklyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
                     End If
 
                     If reportType = "Monthly" Then
                         monthlyGeneration = reader.GetDateTime(2)
                         ' monthlyStatus = reader.GetValue(5).ToString
                         lblMonthlyStatus.Text = reader.GetValue(5).ToString
+                        monthlyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
                     End If
                 Loop
             End If
             conn.Close()
             conn.Dispose()
         Catch ex As Exception
-            MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
+            WriteLog("Error fetching configuration. " & ex.Message)
+            'MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
             conn.Close()
             conn.Dispose()
         End Try
@@ -122,40 +136,62 @@ Public Class RedSkyMain
     End Sub
 
     Private Sub btnRunReports_Click(sender As Object, e As EventArgs) Handles btnRunReports.Click
-        timer.Interval = 60000 ' 1 minute
+        timer.Interval = 15000 ' 1 minute
         AddHandler timer.Elapsed, AddressOf Me.OnTimer
         timer.Start()
         SetRunStatus("RUN")
         btnRunReports.Enabled = False
+        btnConfiguration.Enabled = False
+        btnReloadConfiguration.Enabled = False
         btnStopReports.Enabled = True
     End Sub
 
     Private Sub OnTimer(sender As Object, e As Timers.ElapsedEventArgs)
-        'GenerateDaily()
+
         today = DateTime.UtcNow.AddHours(8)
-        'MsgBox(today.ToShortTimeString)
-        'MsgBox(dailyGeneration.ToShortTimeString)
-        Dim newDateFrom As DateTime
-        newDateFrom = Convert.ToDateTime(today.ToShortDateString & " " & dailyFrom.ToLongTimeString)
 
-        Dim newDateTo As DateTime
-        newDateTo = Convert.ToDateTime(today.ToShortDateString & " " & dailyTo.ToLongTimeString)
-
-        If dailyFrom.ToString("tt") = "PM" And dailyTo.ToString("tt") = "AM" Then
-            newDateFrom = newDateFrom.AddDays(-1)
+        'DAILY REPORT
+        If lblDailyStatus.Text = "ENABLED" Then
+            If today.ToShortTimeString = dailyGeneration.ToShortTimeString Then
+                GenerateDaily()
+            End If
         End If
 
-        If today.ToShortTimeString = dailyGeneration.ToShortTimeString Then
-            GenerateDaily(newDateFrom, newDateTo, today)
-            'MsgBox("Generated!")
-        Else
-            MsgBox("Do not generate!")
+        'WEEKLY REPORT
+        If lblWeeklyStatus.Text = "ENABLED" Then
+            If today.DayOfWeek.ToString.ToUpper = weeklyGenerationDay Then
+                If today.ToShortTimeString = weeklyGeneration.ToShortTimeString Then
+                    GenerateWeekly()
+                End If
+            End If
+        End If
+
+        'MONTHLY REPORT
+        Dim daysInMonth As Integer
+        daysInMonth = Date.DaysInMonth(today.Year, today.Month)
+        Dim lastDayInMonth As Date = New Date(today.Year, today.Month, daysInMonth)
+        If lblMonthlyStatus.Text = "ENABLED" Then
+            If today.ToShortDateString = lastDayInMonth.ToShortDateString Then
+                If today.ToShortTimeString = monthlyGeneration.ToShortTimeString Then
+                    GenerateMonthly(lastDayInMonth)
+                End If
+            End If
         End If
     End Sub
 
-    Private Sub GenerateDaily(dateFrom As DateTime, dateTo As DateTime, dateGenerated As DateTime)
+    Private Sub GenerateDaily()
+        Dim dateFrom As DateTime
+        dateFrom = Convert.ToDateTime(today.ToShortDateString & " " & dailyFrom.ToLongTimeString)
+
+        Dim dateTo As DateTime
+        dateTo = Convert.ToDateTime(today.ToShortDateString & " " & dailyTo.ToLongTimeString)
+
+        If dailyFrom.ToString("tt") = "PM" And dailyTo.ToString("tt") = "AM" Then
+            dateFrom = dateFrom.AddDays(-1)
+        End If
+
         Dim generated As Boolean = False
-        Dim filePath As String = reportsLocation & "\RedSky\Daily\"
+        Dim filePath As String = Application.StartupPath & "\Reports\Daily\"
         Dim fileName As String = ""
         Dim seats As Integer = 0
 
@@ -163,102 +199,378 @@ Public Class RedSkyMain
             Directory.CreateDirectory(filePath)
         End If
 
-        If lblDailyStatus.Text = "ENABLED" Then
-            Try
-                conn.ConnectionString = connectionString
-                conn.Open()
-                cmd.Connection = conn
-                cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo"
-                cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
-                cmd.Parameters.AddWithValue("@dateTo", dateTo)
-                reader = cmd.ExecuteReader
-                If reader.HasRows Then
-                    'MsgBox("Has Data!")
-                    Try
-                        Dim xlApp As New Excel.Application
-                        Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
-                        Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
-                        xlWorksheet.Name = "Agent Logins"
-                        Dim xlRange As Excel.Range
-                        xlRange = xlWorksheet.Range("A1", "H1")
-                        xlRange.ColumnWidth = 30
-                        xlRange.Interior.Color = Color.LightBlue
-                        xlRange.Font.Bold = True
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "SELECT LoginDate, LoginTime, COUNT(Username), Username, Workstation FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo GROUP	BY LoginDate, LoginTime, Username, Workstation"
+            cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
+            cmd.Parameters.AddWithValue("@dateTo", dateTo)
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                'MsgBox("Has Data!")
+                Try
+                    Dim xlApp As New Excel.Application
+                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                    xlWorksheet.Name = "Agent Logins"
+                    Dim xlRange As Excel.Range
+                    xlRange = xlWorksheet.Range("A5", "E5")
+                    xlRange.ColumnWidth = 30
+                    xlRange.Interior.Color = Color.LightBlue
+                    xlRange.Font.Bold = True
 
-                        xlWorksheet.Range("A1").Value = "ID"
-                        xlWorksheet.Range("B1").Value = "USERNAME"
-                        xlWorksheet.Range("C1").Value = "WORKSTATION"
-                        xlWorksheet.Range("D1").Value = "LOGIN DATE"
-                        xlWorksheet.Range("E1").Value = "LOGIN TIME"
-                        xlWorksheet.Range("F1").Value = "LOGOUT DATE"
-                        xlWorksheet.Range("G1").Value = "LOGOUT TIME"
-                        xlWorksheet.Range("H1").Value = "LOGIN DURATION"
+                    xlWorksheet.Range("D2").Value = "PERIOD: " & dateFrom.ToString & " - " & dateTo.ToString
 
-                        Dim rowCount As Integer = 2
+                    xlWorksheet.Range("A5").Value = "LOGIN DATE"
+                    xlWorksheet.Range("B5").Value = "LOGIN TIME"
+                    xlWorksheet.Range("C5").Value = "SEATS USED"
+                    xlWorksheet.Range("D5").Value = "USERNAME"
+                    xlWorksheet.Range("E5").Value = "WORDKSTATION"
+                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
+                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
+                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
+                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
 
-                        Do While reader.Read
-                            xlWorksheet.Cells(rowCount, 1) = reader.GetValue(0).ToString
-                            xlWorksheet.Cells(rowCount, 2) = reader.GetValue(1).ToString
-                            xlWorksheet.Cells(rowCount, 3) = reader.GetValue(2).ToString
-                            xlWorksheet.Cells(rowCount, 4) = reader.GetDateTime(3).ToShortDateString
-                            xlWorksheet.Cells(rowCount, 5) = reader.GetDateTime(4).ToString
-                            xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(5), Nothing, reader.GetDateTime(5).ToShortDateString)
-                            xlWorksheet.Cells(rowCount, 7) = reader.GetValue(6).ToString
-                            xlWorksheet.Cells(rowCount, 8) = reader.GetValue(7).ToString
-                            rowCount += 1
-                            seats += 1
-                        Loop
+                    Dim rowCount As Integer = 6
 
-                        fileName = "DailyReport" & dateGenerated.ToString("ddmmyyyy") & ".xlsx"
+                    Do While reader.Read
+                        xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0))
+                        xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1))
+                        xlWorksheet.Cells(rowCount, 3) = If(reader.IsDBNull(2), Nothing, reader.GetValue(2))
+                        xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(3), Nothing, reader.GetValue(3))
+                        xlWorksheet.Cells(rowCount, 5) = If(reader.IsDBNull(4), Nothing, reader.GetValue(4))
+                        rowCount += 1
+                        seats += 1
+                    Loop
 
-                        If File.Exists(filePath & fileName) Then
-                            File.Delete(filePath & fileName)
-                        End If
+                    xlWorksheet.Range("D3").Value = "TOTAL SEATS USED: " & seats.ToString
 
-                        xlWorksheet.SaveAs(filePath & fileName)
+                    fileName = "CSI RedSky Daily Summary " & today.ToString("ddMMyyyy") & ".xlsx"
 
-                        xlWorkbook.Close()
-                        xlApp.Quit()
+                    If File.Exists(filePath & fileName) Then
+                        File.Delete(filePath & fileName)
+                    End If
 
-                        xlApp = Nothing
-                        xlWorkbook = Nothing
-                        xlWorksheet = Nothing
+                    xlWorksheet.SaveAs(filePath & fileName)
 
-                        generated = True
+                    xlWorkbook.Close()
+                    xlApp.Quit()
 
-                        'MsgBox("Successfully generated report.", MsgBoxStyle.Information, "Daily Report")
-                    Catch ex As Exception
-                        'MsgBox("Error generating report. " & ex.Message, MsgBoxStyle.Exclamation, "Daily Report")
-                    End Try
-                    'Else
-                    'MsgBox("No Data! " & dateFrom & " " & dateTo)
-                End If
-                cmd.Parameters.Clear()
-                conn.Close()
-                conn.Dispose()
-            Catch ex As Exception
-                MsgBox("Error generating report. " & ex.Message, MsgBoxStyle.Exclamation, "Daily Report")
-                conn.Close()
-                conn.Dispose()
-            End Try
-        Else
-            MsgBox("Daily generation is DISABLED. Please change configuration.", MsgBoxStyle.Exclamation, "Daily Report")
-        End If
+                    xlApp = Nothing
+                    xlWorkbook = Nothing
+                    xlWorksheet = Nothing
+
+                    generated = True
+
+                    WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
+                Catch ex As Exception
+                    WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+                End Try
+                'Else
+                'MsgBox("No Data! " & dateFrom & " " & dateTo)
+            End If
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        Catch ex As Exception
+            WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+            conn.Close()
+            conn.Dispose()
+        End Try
 
         If generated = True Then
             Dim subject As String
-            subject = "RedSky Daily Report " & today.ToShortDateString
+            subject = "CSI - RedSky: Daily Summary " & today.ToShortDateString
             Dim body As String
             body = "Hi, <br><br> Today, your number of seats utilized are: " & seats.ToString & " <br>Please see attched file for more details. <br><br>Best Regards, <br>Capstone Solutions Inc."
             Dim attachment As String
             attachment = filePath & fileName
-            AutomaticEmail(subject, SMTPUsername, "reynaflorsentillas.rs@gmail.com", body, attachment)
+            AutomaticEmail(subject, SMTPUsername, body, attachment, "Daily")
+
+            Dim nextGeneration As DateTime
+            nextGeneration = Convert.ToDateTime(today.ToShortDateString & " " & dailyGeneration.ToLongTimeString)
+            If dailyLastGeneration = Nothing Then
+                dailyLastGeneration = nextGeneration
+            End If
+            nextGeneration = nextGeneration.AddDays(1)
+            If dailyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
+                dailyLastGeneration = dailyLastGeneration.AddDays(-1)
+            End If
+            UpdateReportConiguration("Daily", dailyLastGeneration, nextGeneration)
         End If
     End Sub
 
-    Private Sub btnConfiguration_Click(sender As Object, e As EventArgs) Handles btnConfiguration.Click
-        Dim frm As New RedSkyConfiguration
-        frm.Show()
+    Private Sub GenerateWeekly()
+        Dim dateFrom As DateTime
+        dateFrom = Convert.ToDateTime(today.ToShortDateString)
+        dateFrom = dateFrom.AddDays(-7)
+
+        Dim dateTo As DateTime
+        dateTo = Convert.ToDateTime(today.ToShortDateString)
+
+        Dim generated As Boolean = False
+        Dim filePath As String = Application.StartupPath & "\Reports\Weekly\"
+        Dim fileName As String = ""
+        Dim seats As Integer = 0
+
+        If Not Directory.Exists(filePath) Then
+            Directory.CreateDirectory(filePath)
+        End If
+
+        Dim nightShift As Boolean = False
+        If dailyFrom.ToString("tt") = "PM" And dailyTo.ToString("tt") = "AM" Then
+            nightShift = True
+        End If
+
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+
+            If nightShift = True Then
+                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+            Else
+                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+            End If
+            'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo"
+            cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
+            cmd.Parameters.AddWithValue("@dateTo", dateTo)
+            cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
+            cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                'MsgBox("Has Data!" & dateFrom.ToString & " " & dateTo.ToString)
+                Try
+                    Dim xlApp As New Excel.Application
+                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                    xlWorksheet.Name = "Weekly Report"
+                    Dim xlRange As Excel.Range
+                    xlRange = xlWorksheet.Range("A2", "B2")
+                    xlRange.ColumnWidth = 30
+                    xlRange.Interior.Color = Color.LightBlue
+                    xlRange.Font.Bold = True
+
+                    xlWorksheet.Range("B1").Value = "PERIOD: " & dateFrom.ToShortDateString & " - " & dateTo.ToShortDateString
+
+                    xlWorksheet.Range("A2").Value = "DATE"
+                    xlWorksheet.Range("B2").Value = "NUMBER OF SEATS"
+                    'xlWorksheet.Range("C1").Value = "WORKSTATION"
+                    'xlWorksheet.Range("D1").Value = "LOGIN DATE"
+                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
+                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
+                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
+                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
+
+                    Dim rowCount As Integer = 3
+
+                    Do While reader.Read
+                        xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
+                        xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
+                        'xlWorksheet.Cells(rowCount, 3) = reader.GetValue(2).ToString
+                        'xlWorksheet.Cells(rowCount, 4) = reader.GetDateTime(3).ToShortDateString
+                        'xlWorksheet.Cells(rowCount, 5) = reader.GetDateTime(4).ToString
+                        'xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(5), Nothing, reader.GetDateTime(5).ToShortDateString)
+                        'xlWorksheet.Cells(rowCount, 7) = reader.GetValue(6).ToString
+                        'xlWorksheet.Cells(rowCount, 8) = reader.GetValue(7).ToString
+                        rowCount += 1
+                        seats += reader.GetValue(1)
+                    Loop
+
+                    fileName = "CSI RedSky Weekly Summary " & dateFrom.ToString("ddMMyyyy") & " - " & dateTo.ToString("ddMMyyyy") & ".xlsx"
+
+                    If File.Exists(filePath & fileName) Then
+                        File.Delete(filePath & fileName)
+                    End If
+
+                    xlWorksheet.SaveAs(filePath & fileName)
+
+                    xlWorkbook.Close()
+                    xlApp.Quit()
+
+                    xlApp = Nothing
+                    xlWorkbook = Nothing
+                    xlWorksheet = Nothing
+
+                    generated = True
+
+                    WriteLog("WEEKLY REPORT: Successfully generated report. " & fileName)
+
+                Catch ex As Exception
+                    MsgBox(ex.Message)
+                    WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
+                End Try
+                'Else
+                'MsgBox("No Data! " & dateFrom.ToString & " " & dateTo.ToString)
+            End If
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        Catch ex As Exception
+            WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
+            conn.Close()
+            conn.Dispose()
+        End Try
+
+
+        If generated = True Then
+            Dim subject As String
+            subject = "CSI - RedSky: Weekly Summary " & dateFrom.ToShortDateString & " - " & dateTo.ToShortDateString
+            Dim body As String
+            body = "Hi, <br><br> You utilized " & seats.ToString & " this week from " & dateFrom.ToShortDateString & " to " & dateTo.ToShortDateString & ". <br>Please see attched file for more details. <br><br>Best Regards, <br>Capstone Solutions Inc."
+            Dim attachment As String
+            attachment = filePath & fileName
+            AutomaticEmail(subject, SMTPUsername, body, attachment, "Weekly")
+
+            Dim nextGeneration As DateTime
+            nextGeneration = Convert.ToDateTime(today.ToShortDateString & " " & weeklyGeneration.ToLongTimeString)
+            If weeklyLastGeneration = Nothing Then
+                weeklyLastGeneration = nextGeneration
+            End If
+            nextGeneration = nextGeneration.AddDays(7)
+            If weeklyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
+                weeklyLastGeneration = weeklyLastGeneration.AddDays(-7)
+            End If
+            UpdateReportConiguration("Weekly", weeklyLastGeneration, nextGeneration)
+        End If
+    End Sub
+
+    Private Sub GenerateMonthly(lastDayInMonth As Date)
+        Dim firstDayInMonth As Date
+        firstDayInMonth = New Date(today.Year, today.Month, 1)
+
+        Dim thisMonth As String
+        thisMonth = MonthName(firstDayInMonth.Month)
+        thisMonth = thisMonth & " " & firstDayInMonth.Year
+
+        Dim generated As Boolean = False
+        Dim filePath As String = Application.StartupPath & "\Reports\Monthly\"
+        Dim fileName As String = ""
+        Dim seats As Integer = 0
+
+        If Not Directory.Exists(filePath) Then
+            Directory.CreateDirectory(filePath)
+        End If
+
+        Dim nightShift As Boolean = False
+        If dailyFrom.ToString("tt") = "PM" And dailyTo.ToString("tt") = "AM" Then
+            nightShift = True
+        End If
+
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            If nightShift = True Then
+                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+            Else
+                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+            End If
+            'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo"
+            cmd.Parameters.AddWithValue("@dateFrom", firstDayInMonth)
+            cmd.Parameters.AddWithValue("@dateTo", lastDayInMonth)
+            cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
+            cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                'MsgBox("Has Data!" & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
+                Try
+                    Dim xlApp As New Excel.Application
+                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                    xlWorksheet.Name = "Monthly Report"
+                    Dim xlRange As Excel.Range
+                    xlRange = xlWorksheet.Range("A5", "B5")
+                    xlRange.ColumnWidth = 30
+                    xlRange.Interior.Color = Color.LightBlue
+                    xlRange.Font.Bold = True
+
+                    xlWorksheet.Range("B2").Value = "PERIOD: " & thisMonth
+
+                    xlWorksheet.Range("A5").Value = "LOGIN DATE"
+                    xlWorksheet.Range("B5").Value = "NUMBER OF SEATS"
+                    'xlWorksheet.Range("C1").Value = "WORKSTATION"
+                    'xlWorksheet.Range("D1").Value = "LOGIN DATE"
+                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
+                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
+                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
+                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
+
+                    Dim rowCount As Integer = 6
+
+                    Do While reader.Read
+                        xlWorksheet.Cells(rowCount, 1) = reader.GetValue(0)
+                        xlWorksheet.Cells(rowCount, 2) = reader.GetValue(1)
+                        'xlWorksheet.Cells(rowCount, 3) = reader.GetValue(2).ToString
+                        'xlWorksheet.Cells(rowCount, 4) = reader.GetDateTime(3).ToShortDateString
+                        'xlWorksheet.Cells(rowCount, 5) = reader.GetDateTime(4).ToString
+                        'xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(5), Nothing, reader.GetDateTime(5).ToShortDateString)
+                        'xlWorksheet.Cells(rowCount, 7) = reader.GetValue(6).ToString
+                        'xlWorksheet.Cells(rowCount, 8) = reader.GetValue(7).ToString
+                        rowCount += 1
+                        seats += reader.GetValue(1)
+                    Loop
+
+                    xlWorksheet.Range("B3").Value = "TOTAL SEATS USED: " & seats.ToString
+
+                    fileName = "CSI RedSky Monthly Summary " & thisMonth & ".xlsx"
+
+                    If File.Exists(filePath & fileName) Then
+                        File.Delete(filePath & fileName)
+                    End If
+
+                    xlWorksheet.SaveAs(filePath & fileName)
+
+                    xlWorkbook.Close()
+                    xlApp.Quit()
+
+                    xlApp = Nothing
+                    xlWorkbook = Nothing
+                    xlWorksheet = Nothing
+
+                    generated = True
+
+                    WriteLog("MONTHLY REPORT: Successfully generated report. " & fileName)
+                Catch ex As Exception
+                    WriteLog("MONTHLY REPORT: Error generating report. " & ex.Message)
+                End Try
+                'Else
+                'MsgBox("No Data! " & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
+            End If
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        Catch ex As Exception
+            WriteLog("MONTHLY REPORT: Error generating report. " & ex.Message)
+            conn.Close()
+            conn.Dispose()
+        End Try
+
+        If generated = True Then
+            Dim subject As String
+            subject = "CSI - RedSky: Monthy Summary " & thisMonth
+            Dim body As String
+            body = "Hi, <br><br> You utilized " & seats.ToString & " for the month of " & thisMonth & ". <br>Please see attched file for more details. <br><br>Best Regards, <br>Capstone Solutions Inc."
+            Dim attachment As String
+            attachment = filePath & fileName
+            AutomaticEmail(subject, SMTPUsername, body, attachment, "Monthly")
+
+            Dim nextGeneration As DateTime
+            nextGeneration = Convert.ToDateTime(today.ToShortDateString & " " & monthlyGeneration.ToLongTimeString)
+            If monthlyLastGeneration = Nothing Then
+                monthlyLastGeneration = nextGeneration
+            End If
+            nextGeneration = nextGeneration.AddMonths(1)
+            If monthlyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
+                monthlyLastGeneration = monthlyLastGeneration.AddMonths(-1)
+            End If
+            UpdateReportConiguration("Monthly", monthlyLastGeneration, nextGeneration)
+        End If
     End Sub
 
     Private Sub GetMailingConfiguration()
@@ -283,6 +595,7 @@ Public Class RedSkyMain
             conn.Close()
             conn.Dispose()
         Catch ex As Exception
+            WriteLog("MAILING CONFIGURATION: Error fetching mailing configuration from table. " & ex.Message)
             conn.Close()
             conn.Dispose()
         End Try
@@ -308,27 +621,37 @@ Public Class RedSkyMain
             conn.Close()
             conn.Dispose()
         Catch ex As Exception
+            WriteLog("MAILING LIST: Error fetching mailing list from table. " & ex.Message)
             conn.Close()
             conn.Dispose()
         End Try
     End Sub
 
-    Private Sub AutomaticEmail(mailSubject As String, mailFrom As String, mailTo As String, mailBody As String, attachment As String)
+    Private Sub AutomaticEmail(mailSubject As String, mailFrom As String, mailBody As String, attachment As String, reportType As String)
+        Dim mail As New MailMessage
+        Dim smtpMail As New SmtpClient(SMTPServer)
+        Dim mailAttach As New Attachment(attachment)
+
         Try
-            Dim mail As New MailMessage
+
             mail.Subject = mailSubject
             mail.From = New MailAddress(mailFrom)
-            mail.To.Add(mailTo)
+
+            For Each email In mailingList
+                If email.Key.Contains(reportType) Then
+                    mail.To.Add(email.Value)
+                End If
+            Next
+
             mail.Body = mailBody
             mail.Priority = MailPriority.High
             mail.IsBodyHtml = True
 
             If File.Exists(attachment) Then
-                Dim mailAttach As New Attachment(attachment)
+
                 mail.Attachments.Add(mailAttach)
             End If
 
-            Dim smtpMail As New SmtpClient(SMTPServer)
             smtpMail.Port = SMTPPort
             smtpMail.DeliveryMethod = SmtpDeliveryMethod.Network
             smtpMail.UseDefaultCredentials = False
@@ -336,39 +659,48 @@ Public Class RedSkyMain
             smtpMail.EnableSsl = SMTPUseSSL
             smtpMail.Timeout = 60000
             smtpMail.Send(mail)
-            MsgBox("Email Sent.", MsgBoxStyle.Information, "Automatic Email")
+            WriteLog("AUTOMATIC EMAIL: Email Sent: " & mailSubject)
+            mailAttach.Dispose()
+            smtpMail.Dispose()
         Catch ex As Exception
-            MsgBox("Error while sending mail." + ex.Message, MsgBoxStyle.Exclamation, "Automatic Email")
+            WriteLog("AUTOMATIC EMAIL: Error while sending mail. " & ex.Message)
+            mailAttach.Dispose()
+            smtpMail.Dispose()
         End Try
     End Sub
 
-    Private Sub GetOtherConfiguration()
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
-            cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
-            reader = cmd.ExecuteReader
-            If reader.HasRows Then
-                Do While reader.Read
-                    reportsLocation = reader.GetValue(2).ToString
-                Loop
-            End If
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        Catch ex As Exception
-            MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
-            conn.Close()
-            conn.Dispose()
-        End Try
+    'Private Sub GetOtherConfiguration()
+    '    Try
+    '        conn.ConnectionString = connectionString
+    '        conn.Open()
+    '        cmd.Connection = conn
+    '        cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
+    '        cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
+    '        reader = cmd.ExecuteReader
+    '        If reader.HasRows Then
+    '            Do While reader.Read
+    '                reportsLocation = reader.GetValue(2).ToString
+    '            Loop
+    '        End If
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    Catch ex As Exception
+    '        MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
+    '        conn.Close()
+    '        conn.Dispose()
+    '    End Try
+    'End Sub
+
+    Private Sub btnConfiguration_Click(sender As Object, e As EventArgs) Handles btnConfiguration.Click
+        Dim frm As New RedSkyConfiguration
+        frm.Show()
     End Sub
 
     Private Sub btnReloadConfiguration_Click(sender As Object, e As EventArgs) Handles btnReloadConfiguration.Click
         GetReportConfiguration()
         GetMailingConfiguration()
-        GetOtherConfiguration()
+        'GetOtherConfiguration()
         SetRunStatus("STOP")
     End Sub
 
@@ -376,6 +708,48 @@ Public Class RedSkyMain
         timer.Stop()
         SetRunStatus("STOP")
         btnStopReports.Enabled = False
+        btnConfiguration.Enabled = True
+        btnReloadConfiguration.Enabled = True
         btnRunReports.Enabled = True
     End Sub
+
+    Private Sub WriteLog(message As String)
+        Dim path As String = Application.StartupPath & "\Logs\"
+        Dim filename As String = "Logs.txt"
+        Dim writeTime As DateTime = DateTime.UtcNow.AddHours(8)
+
+        If Not Directory.Exists(path) Then
+            Directory.CreateDirectory(path)
+        End If
+
+        If Not File.Exists(path & filename) Then
+            File.Create(path & filename)
+        Else
+            Using writer As StreamWriter = File.AppendText(path & filename)
+                writer.WriteLine("LOG TIMESTAMP: " & writeTime.ToString & vbTab & "LOG MESSAGE: " & message & vbNewLine & vbNewLine)
+            End Using
+        End If
+    End Sub
+
+    Private Sub UpdateReportConiguration(reportType As String, lastGeneration As DateTime, nextGeneration As DateTime)
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "UPDATE ReportConfiguration SET LastReportGeneration = @LastReportGeneration, NextReportGeneration = @NextReportGeneration WHERE ReportType = @ReportType"
+            cmd.Parameters.AddWithValue("@LastReportGeneration", lastGeneration)
+            cmd.Parameters.AddWithValue("@NextReportGeneration", nextGeneration)
+            cmd.Parameters.AddWithValue("@ReportType", reportType)
+            cmd.ExecuteNonQuery()
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Successfully updated report configuration. ")
+        Catch ex As Exception
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Error updating Report Configuration. " & ex.Message)
+            conn.Close()
+            conn.Dispose()
+        End Try
+    End Sub
+
 End Class

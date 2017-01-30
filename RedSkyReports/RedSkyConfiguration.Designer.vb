@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class RedSkyConfiguration
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class RedSkyConfiguration
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
@@ -79,11 +79,6 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListStatus = New System.Windows.Forms.Label()
         Me.lblMailingListEmailAddress = New System.Windows.Forms.Label()
         Me.gvMailingList = New System.Windows.Forms.DataGridView()
-        Me.TabPage4 = New System.Windows.Forms.TabPage()
-        Me.lblOtherConfigurationConfigName = New System.Windows.Forms.Label()
-        Me.txtOtherConfigurationConfigValue = New System.Windows.Forms.TextBox()
-        Me.btnOtherConfigurationSave = New System.Windows.Forms.Button()
-        Me.lblOtherConfigurationConfigId = New System.Windows.Forms.Label()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -92,7 +87,6 @@ Partial Class RedSkyConfiguration
         Me.TabPage2.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.TabPage4.SuspendLayout()
         Me.SuspendLayout()
         '
         'TabControl1
@@ -100,7 +94,6 @@ Partial Class RedSkyConfiguration
         Me.TabControl1.Controls.Add(Me.TabPage1)
         Me.TabControl1.Controls.Add(Me.TabPage2)
         Me.TabControl1.Controls.Add(Me.TabPage3)
-        Me.TabControl1.Controls.Add(Me.TabPage4)
         Me.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TabControl1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
@@ -165,14 +158,16 @@ Partial Class RedSkyConfiguration
         Me.Label5.AutoSize = True
         Me.Label5.Location = New System.Drawing.Point(6, 46)
         Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(166, 18)
+        Me.Label5.Size = New System.Drawing.Size(134, 18)
         Me.Label5.TabIndex = 4
-        Me.Label5.Text = "Date Time of Generation: "
+        Me.Label5.Text = "Time of Generation: "
         '
         'lblMonthyNextReport
         '
         Me.lblMonthyNextReport.AutoSize = True
-        Me.lblMonthyNextReport.Location = New System.Drawing.Point(395, 80)
+        Me.lblMonthyNextReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblMonthyNextReport.ForeColor = System.Drawing.Color.DarkGreen
+        Me.lblMonthyNextReport.Location = New System.Drawing.Point(356, 80)
         Me.lblMonthyNextReport.Name = "lblMonthyNextReport"
         Me.lblMonthyNextReport.Size = New System.Drawing.Size(48, 18)
         Me.lblMonthyNextReport.TabIndex = 3
@@ -181,7 +176,9 @@ Partial Class RedSkyConfiguration
         'lblMonthlyLastReport
         '
         Me.lblMonthlyLastReport.AutoSize = True
-        Me.lblMonthlyLastReport.Location = New System.Drawing.Point(395, 46)
+        Me.lblMonthlyLastReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblMonthlyLastReport.ForeColor = System.Drawing.Color.DarkGreen
+        Me.lblMonthlyLastReport.Location = New System.Drawing.Point(356, 46)
         Me.lblMonthlyLastReport.Name = "lblMonthlyLastReport"
         Me.lblMonthlyLastReport.Size = New System.Drawing.Size(48, 18)
         Me.lblMonthlyLastReport.TabIndex = 2
@@ -191,7 +188,7 @@ Partial Class RedSkyConfiguration
         '
         Me.cboMonthlyStatus.FormattingEnabled = True
         Me.cboMonthlyStatus.Items.AddRange(New Object() {"ENABLED", "DISABLED"})
-        Me.cboMonthlyStatus.Location = New System.Drawing.Point(178, 77)
+        Me.cboMonthlyStatus.Location = New System.Drawing.Point(152, 77)
         Me.cboMonthlyStatus.Name = "cboMonthlyStatus"
         Me.cboMonthlyStatus.Size = New System.Drawing.Size(121, 26)
         Me.cboMonthlyStatus.TabIndex = 1
@@ -199,10 +196,10 @@ Partial Class RedSkyConfiguration
         'dtMonthly
         '
         Me.dtMonthly.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtMonthly.Location = New System.Drawing.Point(178, 40)
+        Me.dtMonthly.Location = New System.Drawing.Point(152, 40)
         Me.dtMonthly.Name = "dtMonthly"
         Me.dtMonthly.ShowUpDown = True
-        Me.dtMonthly.Size = New System.Drawing.Size(200, 26)
+        Me.dtMonthly.Size = New System.Drawing.Size(147, 26)
         Me.dtMonthly.TabIndex = 0
         '
         'GroupBox2
@@ -245,7 +242,7 @@ Partial Class RedSkyConfiguration
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(341, 39)
+        Me.Label4.Location = New System.Drawing.Point(341, 30)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(53, 18)
         Me.Label4.TabIndex = 5
@@ -263,6 +260,8 @@ Partial Class RedSkyConfiguration
         'lblWeeklyNextReport
         '
         Me.lblWeeklyNextReport.AutoSize = True
+        Me.lblWeeklyNextReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblWeeklyNextReport.ForeColor = System.Drawing.Color.DarkGreen
         Me.lblWeeklyNextReport.Location = New System.Drawing.Point(356, 95)
         Me.lblWeeklyNextReport.Name = "lblWeeklyNextReport"
         Me.lblWeeklyNextReport.Size = New System.Drawing.Size(48, 18)
@@ -272,7 +271,9 @@ Partial Class RedSkyConfiguration
         'lblWeeklyLastReport
         '
         Me.lblWeeklyLastReport.AutoSize = True
-        Me.lblWeeklyLastReport.Location = New System.Drawing.Point(356, 72)
+        Me.lblWeeklyLastReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblWeeklyLastReport.ForeColor = System.Drawing.Color.DarkGreen
+        Me.lblWeeklyLastReport.Location = New System.Drawing.Point(356, 63)
         Me.lblWeeklyLastReport.Name = "lblWeeklyLastReport"
         Me.lblWeeklyLastReport.Size = New System.Drawing.Size(48, 18)
         Me.lblWeeklyLastReport.TabIndex = 2
@@ -282,7 +283,7 @@ Partial Class RedSkyConfiguration
         '
         Me.cboWeeklyStatus.FormattingEnabled = True
         Me.cboWeeklyStatus.Items.AddRange(New Object() {"ENABLED", "DISABLED"})
-        Me.cboWeeklyStatus.Location = New System.Drawing.Point(410, 31)
+        Me.cboWeeklyStatus.Location = New System.Drawing.Point(410, 22)
         Me.cboWeeklyStatus.Name = "cboWeeklyStatus"
         Me.cboWeeklyStatus.Size = New System.Drawing.Size(163, 26)
         Me.cboWeeklyStatus.TabIndex = 1
@@ -374,6 +375,8 @@ Partial Class RedSkyConfiguration
         'lblDailyNextReport
         '
         Me.lblDailyNextReport.AutoSize = True
+        Me.lblDailyNextReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblDailyNextReport.ForeColor = System.Drawing.Color.DarkGreen
         Me.lblDailyNextReport.Location = New System.Drawing.Point(356, 99)
         Me.lblDailyNextReport.Name = "lblDailyNextReport"
         Me.lblDailyNextReport.Size = New System.Drawing.Size(48, 18)
@@ -383,6 +386,8 @@ Partial Class RedSkyConfiguration
         'lblDailyLastReport
         '
         Me.lblDailyLastReport.AutoSize = True
+        Me.lblDailyLastReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblDailyLastReport.ForeColor = System.Drawing.Color.DarkGreen
         Me.lblDailyLastReport.Location = New System.Drawing.Point(87, 99)
         Me.lblDailyLastReport.Name = "lblDailyLastReport"
         Me.lblDailyLastReport.Size = New System.Drawing.Size(48, 18)
@@ -574,6 +579,7 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListId.Size = New System.Drawing.Size(21, 18)
         Me.lblMailingListId.TabIndex = 11
         Me.lblMailingListId.Text = "ID"
+        Me.lblMailingListId.Visible = False
         '
         'btnMailingListEdit
         '
@@ -686,60 +692,13 @@ Partial Class RedSkyConfiguration
         Me.gvMailingList.Size = New System.Drawing.Size(616, 338)
         Me.gvMailingList.TabIndex = 0
         '
-        'TabPage4
-        '
-        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationConfigId)
-        Me.TabPage4.Controls.Add(Me.btnOtherConfigurationSave)
-        Me.TabPage4.Controls.Add(Me.txtOtherConfigurationConfigValue)
-        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationConfigName)
-        Me.TabPage4.Location = New System.Drawing.Point(4, 27)
-        Me.TabPage4.Name = "TabPage4"
-        Me.TabPage4.Size = New System.Drawing.Size(616, 439)
-        Me.TabPage4.TabIndex = 3
-        Me.TabPage4.Text = "Other Configuration"
-        Me.TabPage4.UseVisualStyleBackColor = True
-        '
-        'lblOtherConfigurationConfigName
-        '
-        Me.lblOtherConfigurationConfigName.AutoSize = True
-        Me.lblOtherConfigurationConfigName.Location = New System.Drawing.Point(13, 18)
-        Me.lblOtherConfigurationConfigName.Name = "lblOtherConfigurationConfigName"
-        Me.lblOtherConfigurationConfigName.Size = New System.Drawing.Size(117, 18)
-        Me.lblOtherConfigurationConfigName.TabIndex = 0
-        Me.lblOtherConfigurationConfigName.Text = "Reports Location: "
-        '
-        'txtOtherConfigurationConfigValue
-        '
-        Me.txtOtherConfigurationConfigValue.Location = New System.Drawing.Point(136, 15)
-        Me.txtOtherConfigurationConfigValue.Name = "txtOtherConfigurationConfigValue"
-        Me.txtOtherConfigurationConfigValue.Size = New System.Drawing.Size(462, 26)
-        Me.txtOtherConfigurationConfigValue.TabIndex = 1
-        '
-        'btnOtherConfigurationSave
-        '
-        Me.btnOtherConfigurationSave.Location = New System.Drawing.Point(481, 47)
-        Me.btnOtherConfigurationSave.Name = "btnOtherConfigurationSave"
-        Me.btnOtherConfigurationSave.Size = New System.Drawing.Size(117, 39)
-        Me.btnOtherConfigurationSave.TabIndex = 2
-        Me.btnOtherConfigurationSave.Text = "Save"
-        Me.btnOtherConfigurationSave.UseVisualStyleBackColor = True
-        '
-        'lblOtherConfigurationConfigId
-        '
-        Me.lblOtherConfigurationConfigId.AutoSize = True
-        Me.lblOtherConfigurationConfigId.Location = New System.Drawing.Point(16, 72)
-        Me.lblOtherConfigurationConfigId.Name = "lblOtherConfigurationConfigId"
-        Me.lblOtherConfigurationConfigId.Size = New System.Drawing.Size(48, 18)
-        Me.lblOtherConfigurationConfigId.TabIndex = 3
-        Me.lblOtherConfigurationConfigId.Text = "Label1"
-        Me.lblOtherConfigurationConfigId.Visible = False
-        '
         'RedSkyConfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(624, 470)
         Me.Controls.Add(Me.TabControl1)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.Name = "RedSkyConfiguration"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
@@ -757,8 +716,6 @@ Partial Class RedSkyConfiguration
         Me.TabPage3.ResumeLayout(False)
         Me.TabPage3.PerformLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.TabPage4.ResumeLayout(False)
-        Me.TabPage4.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -820,9 +777,4 @@ Partial Class RedSkyConfiguration
     Friend WithEvents dtDailyFrom As DateTimePicker
     Friend WithEvents lblWeeklyDay As Label
     Friend WithEvents cboWeeklyDay As ComboBox
-    Friend WithEvents TabPage4 As TabPage
-    Friend WithEvents btnOtherConfigurationSave As Button
-    Friend WithEvents txtOtherConfigurationConfigValue As TextBox
-    Friend WithEvents lblOtherConfigurationConfigName As Label
-    Friend WithEvents lblOtherConfigurationConfigId As Label
 End Class

@@ -3,6 +3,7 @@ Imports System.Data
 Imports System.Data.SqlClient
 Imports System.Configuration
 Imports System.ServiceProcess
+Imports System.Management
 
 Public Class RedSky
     Dim connectionString As String = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
@@ -15,6 +16,11 @@ Public Class RedSky
     Dim eventId As Integer = 1
     Dim timer As System.Timers.Timer = New System.Timers.Timer()
 
+    Dim currentDomain As String = Environment.UserDomainName
+    Dim currentUser As String = ""
+    'Dim localWorkstation As String = Environment.MachineName
+    Dim currentMachine As String = System.Net.Dns.GetHostName.ToString
+
     Protected Overrides Sub OnStart(ByVal args() As String)
         ' Add code here to start your service. This method should set things
         ' in motion so your service can do its work.
@@ -23,12 +29,30 @@ Public Class RedSky
         'Timer.Interval = 300000 ' 5 minutes
         'AddHandler timer.Elapsed, AddressOf Me.OnTimer
         'Timer.Start()
+
+        Try
+            Dim searcher As New ManagementObjectSearcher("SELECT UserName FROM Win32_ComputerSystem")
+            Dim collection As ManagementObjectCollection = searcher.[Get]()
+            Dim users As String = ""
+            For Each oReturn As ManagementObject In collection
+                users = oReturn("UserName")
+                Dim user As String()
+                user = users.Split("\")
+                For i = 0 To user.Length Step 1
+                    If i = 1 Then
+                        currentUser = user(i)
+                    End If
+                Next
+            Next
+        Catch ex As Exception
+            EventLog1.WriteEntry("Error fetching and parsing username of current user. " & ex.Message, EventLogEntryType.Error, eventId)
+            eventId += 1
+        End Try
+
     End Sub
 
     Protected Overrides Sub OnStop()
         ' Add code here to perform any tear-down necessary to stop your service.
-        'EventLog1.WriteEntry("In OnStop.")
-        'Me.WriteToFile("RedSky Agent Login Monitoring stopped at " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"))
         Me.AgentLogout()
     End Sub
 
@@ -49,12 +73,13 @@ Public Class RedSky
     End Sub
 
     Private Sub AgentLogin()
-        Dim machinename As String = Environment.MachineName
-        Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
-        Dim agentlogin As DateTime = DateTime.Now
+        'Dim machinename As String = Environment.MachineName
+        'Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
+        Dim user As String = currentDomain & "\" & currentUser
+        Dim agentlogin As DateTime = DateTime.UtcNow.AddHours(8)
         currentAgentLogin = agentlogin
-        Me.CheckAgentLogin(username, machinename)
-        Me.AgentLoginDBInsert(username, machinename, agentlogin)
+        Me.CheckAgentLogin(user, currentMachine)
+        Me.AgentLoginDBInsert(user, currentMachine, agentlogin)
     End Sub
 
     Private Sub CheckAgentLogin(username As String, machinename As String)
@@ -88,7 +113,7 @@ Public Class RedSky
                 cmd.Connection = conn
                 cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, ModifiedDate = @ModifiedDate WHERE Username = @Username AND isLogin = 1"
                 cmd.Parameters.AddWithValue("@Remarks", remarks)
-                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.Now)
+                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.UtcNow.AddHours(8))
                 cmd.Parameters.AddWithValue("@Username", username)
                 cmd.ExecuteNonQuery()
                 EventLog1.WriteEntry(remarks, EventLogEntryType.Information, eventId)
@@ -131,10 +156,11 @@ Public Class RedSky
     End Sub
 
     Private Sub AgentLogout()
-        Dim machinename As String = Environment.MachineName
-        Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
-        Dim agentlogout As DateTime = DateTime.Now
-        Me.AgentLogoutDBUpdate(username, machinename, agentlogout)
+        'Dim machinename As String = Environment.MachineName
+        'Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
+        Dim user As String = currentDomain & "\" & currentUser
+        Dim agentlogout As DateTime = DateTime.UtcNow.AddHours(8)
+        Me.AgentLogoutDBUpdate(user, currentMachine, agentlogout)
     End Sub
 
     Private Sub AgentLogoutDBUpdate(username As String, machinename As String, agentlogout As DateTime)
@@ -164,9 +190,10 @@ Public Class RedSky
 
     Private Sub OnTimer(sender As Object, e As Timers.ElapsedEventArgs)
         ' TODO: Insert monitoring activities here.
-        Dim machinename As String = Environment.MachineName
-        Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
-        Dim currentDateTime As DateTime = DateTime.Now
+        'Dim machinename As String = Environment.MachineName
+        'Dim username As String = System.Security.Principal.WindowsIdentity.GetCurrent().Name
+        Dim user As String = currentDomain & "\" & currentUser
+        Dim currentDateTime As DateTime = DateTime.UtcNow.AddHours(8)
 
         Dim span As New TimeSpan
         span = currentDateTime.Subtract(currentAgentLogin)
@@ -176,8 +203,8 @@ Public Class RedSky
         Dim loginDuration As String = loginDurationSpan.ToString("hh\:mm\:ss")
 
         'EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information)
-        Me.AgentLoginDBUpdate(username, machinename, loginDuration, currentDateTime)
-        Me.CheckForceLogOff(username, machinename)
+        Me.AgentLoginDBUpdate(user, currentDomain, loginDuration, currentDateTime)
+        Me.CheckForceLogOff(user, currentDomain)
     End Sub
 
     Private Sub AgentLoginDBUpdate(username As String, machinename As String, loginDuration As String, currentDateTime As DateTime)

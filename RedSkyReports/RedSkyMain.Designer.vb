@@ -41,7 +41,7 @@ Partial Class RedSkyMain
         '
         Me.btnRunReports.Font = New System.Drawing.Font("Calibri", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnRunReports.ForeColor = System.Drawing.Color.DarkGreen
-        Me.btnRunReports.Location = New System.Drawing.Point(31, 151)
+        Me.btnRunReports.Location = New System.Drawing.Point(34, 144)
         Me.btnRunReports.Name = "btnRunReports"
         Me.btnRunReports.Size = New System.Drawing.Size(164, 42)
         Me.btnRunReports.TabIndex = 0
@@ -51,7 +51,7 @@ Partial Class RedSkyMain
         'btnConfiguration
         '
         Me.btnConfiguration.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnConfiguration.Location = New System.Drawing.Point(31, 199)
+        Me.btnConfiguration.Location = New System.Drawing.Point(34, 192)
         Me.btnConfiguration.Name = "btnConfiguration"
         Me.btnConfiguration.Size = New System.Drawing.Size(164, 42)
         Me.btnConfiguration.TabIndex = 1
@@ -122,7 +122,7 @@ Partial Class RedSkyMain
         '
         Me.btnStopReports.Font = New System.Drawing.Font("Calibri", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnStopReports.ForeColor = System.Drawing.Color.DarkRed
-        Me.btnStopReports.Location = New System.Drawing.Point(216, 151)
+        Me.btnStopReports.Location = New System.Drawing.Point(219, 144)
         Me.btnStopReports.Name = "btnStopReports"
         Me.btnStopReports.Size = New System.Drawing.Size(164, 42)
         Me.btnStopReports.TabIndex = 11
@@ -162,7 +162,7 @@ Partial Class RedSkyMain
         'btnReloadConfiguration
         '
         Me.btnReloadConfiguration.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnReloadConfiguration.Location = New System.Drawing.Point(216, 199)
+        Me.btnReloadConfiguration.Location = New System.Drawing.Point(219, 192)
         Me.btnReloadConfiguration.Name = "btnReloadConfiguration"
         Me.btnReloadConfiguration.Size = New System.Drawing.Size(164, 42)
         Me.btnReloadConfiguration.TabIndex = 12
@@ -173,7 +173,7 @@ Partial Class RedSkyMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(411, 259)
+        Me.ClientSize = New System.Drawing.Size(411, 258)
         Me.Controls.Add(Me.btnReloadConfiguration)
         Me.Controls.Add(Me.lblMonthlyRunStatus)
         Me.Controls.Add(Me.lblWeeklyRunStatus)
@@ -187,6 +187,7 @@ Partial Class RedSkyMain
         Me.Controls.Add(Me.btnConfiguration)
         Me.Controls.Add(Me.btnRunReports)
         Me.Controls.Add(Me.btnStopReports)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.Name = "RedSkyMain"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "RedSky Reports"

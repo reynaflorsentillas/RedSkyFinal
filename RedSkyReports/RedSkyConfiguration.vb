@@ -19,7 +19,7 @@ Public Class RedSkyConfiguration
         GetReportConfiguration()
         GetMailingConfiguration()
         GetMailingList()
-        GetOtherConfiguration()
+        'GetOtherConfiguration()
         lblMailingListId.Text = gvMailingList.Item(0, 0).Value
         txtMailingListEmailAddress.Text = gvMailingList.Item(1, 0).Value
         cboMailingListStatus.SelectedItem = gvMailingList.Item(2, 0).Value
@@ -43,8 +43,8 @@ Public Class RedSkyConfiguration
 
                     If reportType = "Daily" Then
                         dtDaily.Value = reader.GetDateTime(2)
-                        lblDailyLastReport.Text = reader.GetValue(3).ToString
-                        lblDailyNextReport.Text = reader.GetValue(4).ToString
+                        lblDailyLastReport.Text = "Last Report: " & reader.GetValue(3).ToString
+                        lblDailyNextReport.Text = "Next Report: " & reader.GetValue(4).ToString
                         cboDailyStatus.SelectedItem = reader.GetValue(5).ToString
                         dtDailyFrom.Value = reader.GetDateTime(6)
                         dtDailyTo.Value = reader.GetDateTime(7)
@@ -52,16 +52,16 @@ Public Class RedSkyConfiguration
 
                     If reportType = "Weekly" Then
                         dtWeekly.Value = reader.GetDateTime(2)
-                        lblWeeklyLastReport.Text = reader.GetValue(3).ToString
-                        lblWeeklyNextReport.Text = reader.GetValue(4).ToString
+                        lblWeeklyLastReport.Text = "Last Report: " & reader.GetValue(3).ToString
+                        lblWeeklyNextReport.Text = "Next Report: " & reader.GetValue(4).ToString
                         cboWeeklyStatus.SelectedItem = reader.GetValue(5).ToString
                         cboWeeklyDay.SelectedItem = reader.GetValue(8).ToString
                     End If
 
                     If reportType = "Monthly" Then
                         dtMonthly.Value = reader.GetDateTime(2)
-                        lblMonthlyLastReport.Text = reader.GetValue(3).ToString
-                        lblMonthyNextReport.Text = reader.GetValue(4).ToString
+                        lblMonthlyLastReport.Text = "Last Report: " & reader.GetValue(3).ToString
+                        lblMonthyNextReport.Text = "Next Report: " & reader.GetValue(4).ToString
                         cboMonthlyStatus.SelectedItem = reader.GetValue(5).ToString
                     End If
                 Loop
@@ -97,7 +97,7 @@ Public Class RedSkyConfiguration
                     status = cboDailyStatus.SelectedItem.ToString
                     dailyFrom = dtDailyFrom.Value
                     dailyTo = dtDailyTo.Value
-                    'weeklyDay = Nothing
+                    weeklyDay = ""
                 ElseIf i = 1 Then
                     reportType = "Weekly"
                     generationDateTime = dtWeekly.Value
@@ -111,7 +111,7 @@ Public Class RedSkyConfiguration
                     status = cboMonthlyStatus.SelectedItem.ToString
                     'dailyFrom = Nothing
                     'dailyTo = Nothing
-                    'weeklyDay = Nothing
+                    weeklyDay = ""
                 End If
 
                 If Not reportType = "" Then
@@ -472,94 +472,94 @@ Public Class RedSkyConfiguration
         End If
     End Sub
 
-    Private Sub GetOtherConfiguration()
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "SELECT * FROM OtherConfiguration"
-            reader = cmd.ExecuteReader
-            If reader.HasRows Then
-                initialConfig = False
-                Do While reader.Read
-                    lblOtherConfigurationConfigId.Text = reader.GetValue(0).ToString
-                    'lblOtherConfigurationConfigName.Text = reader.GetValue(1).ToString
-                    txtOtherConfigurationConfigValue.Text = reader.GetValue(2).ToString
-                Loop
-            Else
-                initialConfig = True
-                lblOtherConfigurationConfigName.Text = ""
-                txtOtherConfigurationConfigValue.Text = ""
-            End If
-            conn.Close()
-            conn.Dispose()
-        Catch ex As Exception
-            MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
-            conn.Close()
-            conn.Dispose()
-        End Try
-    End Sub
+    'Private Sub GetOtherConfiguration()
+    '    Try
+    '        conn.ConnectionString = connectionString
+    '        conn.Open()
+    '        cmd.Connection = conn
+    '        cmd.CommandText = "SELECT * FROM OtherConfiguration"
+    '        reader = cmd.ExecuteReader
+    '        If reader.HasRows Then
+    '            initialConfig = False
+    '            Do While reader.Read
+    '                lblOtherConfigurationConfigId.Text = reader.GetValue(0).ToString
+    '                'lblOtherConfigurationConfigName.Text = reader.GetValue(1).ToString
+    '                txtOtherConfigurationConfigValue.Text = reader.GetValue(2).ToString
+    '            Loop
+    '        Else
+    '            initialConfig = True
+    '            lblOtherConfigurationConfigName.Text = ""
+    '            txtOtherConfigurationConfigValue.Text = ""
+    '        End If
+    '        conn.Close()
+    '        conn.Dispose()
+    '    Catch ex As Exception
+    '        MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
+    '        conn.Close()
+    '        conn.Dispose()
+    '    End Try
+    'End Sub
 
-    Private Sub btnOtherConfigurationSave_Click(sender As Object, e As EventArgs) Handles btnOtherConfigurationSave.Click
-        If txtOtherConfigurationConfigValue.Text = "" Then
-            MsgBox("One or more field(s) is empty. All fields are required.", MsgBoxStyle.Exclamation, "Required Fields")
-        Else
-            Try
-                If Not Directory.Exists(txtOtherConfigurationConfigValue.Text & "\RedSky\") Then
-                    Directory.CreateDirectory(txtOtherConfigurationConfigValue.Text & "\RedSky\")
-                End If
+    'Private Sub btnOtherConfigurationSave_Click(sender As Object, e As EventArgs)
+    '    If txtOtherConfigurationConfigValue.Text = "" Then
+    '        MsgBox("One or more field(s) is empty. All fields are required.", MsgBoxStyle.Exclamation, "Required Fields")
+    '    Else
+    '        Try
+    '            If Not Directory.Exists(txtOtherConfigurationConfigValue.Text & "\RedSky\") Then
+    '                Directory.CreateDirectory(txtOtherConfigurationConfigValue.Text & "\RedSky\")
+    '            End If
 
-                If initialConfig = True Then
-                    NewOtherConfiguration()
-                Else
-                    UpdateOtherConfiguration()
-                End If
-                GetOtherConfiguration()
-                MsgBox("Successfully updated configuration. New report directory: " & txtOtherConfigurationConfigValue.Text & "\RedSky\ " & " Please reload configuration.", MsgBoxStyle.Information, "Update Report Configuration")
-            Catch ex As Exception
-                MsgBox("Error updating configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Update Report Configuration")
-            End Try
-        End If
-    End Sub
+    '            If initialConfig = True Then
+    '                NewOtherConfiguration()
+    '            Else
+    '                UpdateOtherConfiguration()
+    '            End If
+    '            GetOtherConfiguration()
+    '            MsgBox("Successfully updated configuration. New report directory: " & txtOtherConfigurationConfigValue.Text & "\RedSky\ " & " Please reload configuration.", MsgBoxStyle.Information, "Update Report Configuration")
+    '        Catch ex As Exception
+    '            MsgBox("Error updating configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Update Report Configuration")
+    '        End Try
+    '    End If
+    'End Sub
 
-    Private Sub NewOtherConfiguration()
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "INSERT INTO OtherConfiguration(ConfigName, ConfigValue) VALUES (@ConfigName, @ConfigValue)"
-            cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
-            cmd.Parameters.AddWithValue("@ConfigValue", txtOtherConfigurationConfigValue.Text)
-            cmd.ExecuteNonQuery()
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        Catch ex As Exception
-            MsgBox("Error inserting new record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
-    End Sub
+    'Private Sub NewOtherConfiguration()
+    '    Try
+    '        conn.ConnectionString = connectionString
+    '        conn.Open()
+    '        cmd.Connection = conn
+    '        cmd.CommandText = "INSERT INTO OtherConfiguration(ConfigName, ConfigValue) VALUES (@ConfigName, @ConfigValue)"
+    '        cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
+    '        cmd.Parameters.AddWithValue("@ConfigValue", txtOtherConfigurationConfigValue.Text)
+    '        cmd.ExecuteNonQuery()
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    Catch ex As Exception
+    '        MsgBox("Error inserting new record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    End Try
+    'End Sub
 
-    Private Sub UpdateOtherConfiguration()
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "UPDATE OtherConfiguration SET ConfigName = @ConfigName, ConfigValue = @ConfigValue WHERE Id = @Id"
-            cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
-            cmd.Parameters.AddWithValue("@ConfigValue", txtOtherConfigurationConfigValue.Text)
-            cmd.Parameters.AddWithValue("@Id", lblOtherConfigurationConfigId.Text)
-            cmd.ExecuteNonQuery()
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        Catch ex As Exception
-            MsgBox("Error updating record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
-    End Sub
+    'Private Sub UpdateOtherConfiguration()
+    '    Try
+    '        conn.ConnectionString = connectionString
+    '        conn.Open()
+    '        cmd.Connection = conn
+    '        cmd.CommandText = "UPDATE OtherConfiguration SET ConfigName = @ConfigName, ConfigValue = @ConfigValue WHERE Id = @Id"
+    '        cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
+    '        cmd.Parameters.AddWithValue("@ConfigValue", txtOtherConfigurationConfigValue.Text)
+    '        cmd.Parameters.AddWithValue("@Id", lblOtherConfigurationConfigId.Text)
+    '        cmd.ExecuteNonQuery()
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    Catch ex As Exception
+    '        MsgBox("Error updating record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    End Try
+    'End Sub
 End Class

@@ -11,7 +11,7 @@ Public Class ProjectInstaller
 
     End Sub
 
-    'Automatically start windows servie after install
+    'Automatically start windows service after install
     Protected Overrides Sub OnAfterInstall(savedState As IDictionary)
         MyBase.OnAfterInstall(savedState)
 
