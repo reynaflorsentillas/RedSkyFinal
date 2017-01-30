@@ -14,7 +14,9 @@ Public Class RedSky
     Dim currentAgentLogin As DateTime
     Dim currentLoginDuration As Double = 0
     Dim eventId As Integer = 1
+
     Dim timer As System.Timers.Timer = New System.Timers.Timer()
+    'Dim forceLogOffTimer As System.Timers.Timer = New System.Timers.Timer()
 
     Dim currentDomain As String = Environment.UserDomainName
     Dim currentUser As String = ""
@@ -60,11 +62,13 @@ Public Class RedSky
     'Me.AgentLogout()
     'End Sub
     Protected Overrides Sub OnSessionChange(changeDescription As SessionChangeDescription)
-        timer.Interval = 300000 ' 5 minutes
+        timer.Interval = 60000 ' 5 minutes
         AddHandler timer.Elapsed, AddressOf Me.OnTimer
+
         If changeDescription.Reason = SessionChangeReason.SessionLogon Then
             Me.AgentLogin()
             timer.Start()
+
         ElseIf changeDescription.Reason = SessionChangeReason.SessionLogoff Then
             Me.AgentLogout()
             timer.Stop()
@@ -203,7 +207,7 @@ Public Class RedSky
         Dim loginDuration As String = loginDurationSpan.ToString("hh\:mm\:ss")
 
         'EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information)
-        Me.AgentLoginDBUpdate(user, currentDomain, loginDuration, currentDateTime)
+        'Me.AgentLoginDBUpdate(user, currentDomain, loginDuration, currentDateTime)
         Me.CheckForceLogOff(user, currentDomain)
     End Sub
 

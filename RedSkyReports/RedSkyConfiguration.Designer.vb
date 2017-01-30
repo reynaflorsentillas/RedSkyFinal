@@ -42,16 +42,17 @@ Partial Class RedSkyConfiguration
         Me.cboWeeklyStatus = New System.Windows.Forms.ComboBox()
         Me.dtWeekly = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.lblDailyTo = New System.Windows.Forms.Label()
-        Me.lblDailyFrom = New System.Windows.Forms.Label()
-        Me.dtDailyTo = New System.Windows.Forms.DateTimePicker()
-        Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.lblDailyGenerationTime = New System.Windows.Forms.Label()
         Me.lblDailyNextReport = New System.Windows.Forms.Label()
         Me.lblDailyLastReport = New System.Windows.Forms.Label()
         Me.cboDailyStatus = New System.Windows.Forms.ComboBox()
         Me.dtDaily = New System.Windows.Forms.DateTimePicker()
+        Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.lblDailyTo = New System.Windows.Forms.Label()
+        Me.lblDailyFrom = New System.Windows.Forms.Label()
+        Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
+        Me.dtDailyTo = New System.Windows.Forms.DateTimePicker()
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.cboSMTPUseTLSSSL = New System.Windows.Forms.ComboBox()
         Me.lblSMTPId = New System.Windows.Forms.Label()
@@ -79,11 +80,14 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListStatus = New System.Windows.Forms.Label()
         Me.lblMailingListEmailAddress = New System.Windows.Forms.Label()
         Me.gvMailingList = New System.Windows.Forms.DataGridView()
+        Me.lblOtherConfigurationDomain = New System.Windows.Forms.Label()
+        Me.txtOtherConfigurationDomain = New System.Windows.Forms.TextBox()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.GroupBox4.SuspendLayout()
         Me.TabPage2.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -99,7 +103,7 @@ Partial Class RedSkyConfiguration
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(624, 470)
+        Me.TabControl1.Size = New System.Drawing.Size(624, 554)
         Me.TabControl1.TabIndex = 8
         '
         'TabPage1
@@ -108,11 +112,12 @@ Partial Class RedSkyConfiguration
         Me.TabPage1.Controls.Add(Me.GroupBox3)
         Me.TabPage1.Controls.Add(Me.GroupBox2)
         Me.TabPage1.Controls.Add(Me.GroupBox1)
+        Me.TabPage1.Controls.Add(Me.GroupBox4)
         Me.TabPage1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabPage1.Location = New System.Drawing.Point(4, 27)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(616, 439)
+        Me.TabPage1.Size = New System.Drawing.Size(616, 523)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Report Configuration"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -120,7 +125,7 @@ Partial Class RedSkyConfiguration
         'btnSaveReportConfiguration
         '
         Me.btnSaveReportConfiguration.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnSaveReportConfiguration.Location = New System.Drawing.Point(489, 389)
+        Me.btnSaveReportConfiguration.Location = New System.Drawing.Point(493, 477)
         Me.btnSaveReportConfiguration.Name = "btnSaveReportConfiguration"
         Me.btnSaveReportConfiguration.Size = New System.Drawing.Size(117, 39)
         Me.btnSaveReportConfiguration.TabIndex = 3
@@ -136,8 +141,8 @@ Partial Class RedSkyConfiguration
         Me.GroupBox3.Controls.Add(Me.cboMonthlyStatus)
         Me.GroupBox3.Controls.Add(Me.dtMonthly)
         Me.GroupBox3.Dock = System.Windows.Forms.DockStyle.Top
-        Me.GroupBox3.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox3.Location = New System.Drawing.Point(3, 253)
+        Me.GroupBox3.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.GroupBox3.Location = New System.Drawing.Point(3, 346)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(610, 125)
         Me.GroupBox3.TabIndex = 2
@@ -147,7 +152,8 @@ Partial Class RedSkyConfiguration
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(6, 80)
+        Me.Label6.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.Label6.Location = New System.Drawing.Point(87, 80)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(53, 18)
         Me.Label6.TabIndex = 5
@@ -156,6 +162,7 @@ Partial Class RedSkyConfiguration
         'Label5
         '
         Me.Label5.AutoSize = True
+        Me.Label5.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.Label5.Location = New System.Drawing.Point(6, 46)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(134, 18)
@@ -186,15 +193,17 @@ Partial Class RedSkyConfiguration
         '
         'cboMonthlyStatus
         '
+        Me.cboMonthlyStatus.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.cboMonthlyStatus.FormattingEnabled = True
         Me.cboMonthlyStatus.Items.AddRange(New Object() {"ENABLED", "DISABLED"})
         Me.cboMonthlyStatus.Location = New System.Drawing.Point(152, 77)
         Me.cboMonthlyStatus.Name = "cboMonthlyStatus"
-        Me.cboMonthlyStatus.Size = New System.Drawing.Size(121, 26)
+        Me.cboMonthlyStatus.Size = New System.Drawing.Size(147, 26)
         Me.cboMonthlyStatus.TabIndex = 1
         '
         'dtMonthly
         '
+        Me.dtMonthly.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.dtMonthly.Format = System.Windows.Forms.DateTimePickerFormat.Time
         Me.dtMonthly.Location = New System.Drawing.Point(152, 40)
         Me.dtMonthly.Name = "dtMonthly"
@@ -213,10 +222,10 @@ Partial Class RedSkyConfiguration
         Me.GroupBox2.Controls.Add(Me.cboWeeklyStatus)
         Me.GroupBox2.Controls.Add(Me.dtWeekly)
         Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Top
-        Me.GroupBox2.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox2.Location = New System.Drawing.Point(3, 128)
+        Me.GroupBox2.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.GroupBox2.Location = New System.Drawing.Point(3, 206)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(610, 125)
+        Me.GroupBox2.Size = New System.Drawing.Size(610, 140)
         Me.GroupBox2.TabIndex = 1
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Weekly Summary Report"
@@ -224,6 +233,7 @@ Partial Class RedSkyConfiguration
         'lblWeeklyDay
         '
         Me.lblWeeklyDay.AutoSize = True
+        Me.lblWeeklyDay.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.lblWeeklyDay.Location = New System.Drawing.Point(14, 39)
         Me.lblWeeklyDay.Name = "lblWeeklyDay"
         Me.lblWeeklyDay.Size = New System.Drawing.Size(126, 18)
@@ -232,6 +242,7 @@ Partial Class RedSkyConfiguration
         '
         'cboWeeklyDay
         '
+        Me.cboWeeklyDay.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.cboWeeklyDay.FormattingEnabled = True
         Me.cboWeeklyDay.Items.AddRange(New Object() {"SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"})
         Me.cboWeeklyDay.Location = New System.Drawing.Point(152, 31)
@@ -242,7 +253,8 @@ Partial Class RedSkyConfiguration
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(341, 30)
+        Me.Label4.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.Label4.Location = New System.Drawing.Point(87, 103)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(53, 18)
         Me.Label4.TabIndex = 5
@@ -251,7 +263,8 @@ Partial Class RedSkyConfiguration
         'lblWeeklyGenerationTime
         '
         Me.lblWeeklyGenerationTime.AutoSize = True
-        Me.lblWeeklyGenerationTime.Location = New System.Drawing.Point(6, 80)
+        Me.lblWeeklyGenerationTime.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblWeeklyGenerationTime.Location = New System.Drawing.Point(6, 72)
         Me.lblWeeklyGenerationTime.Name = "lblWeeklyGenerationTime"
         Me.lblWeeklyGenerationTime.Size = New System.Drawing.Size(134, 18)
         Me.lblWeeklyGenerationTime.TabIndex = 4
@@ -281,17 +294,19 @@ Partial Class RedSkyConfiguration
         '
         'cboWeeklyStatus
         '
+        Me.cboWeeklyStatus.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.cboWeeklyStatus.FormattingEnabled = True
         Me.cboWeeklyStatus.Items.AddRange(New Object() {"ENABLED", "DISABLED"})
-        Me.cboWeeklyStatus.Location = New System.Drawing.Point(410, 22)
+        Me.cboWeeklyStatus.Location = New System.Drawing.Point(152, 100)
         Me.cboWeeklyStatus.Name = "cboWeeklyStatus"
-        Me.cboWeeklyStatus.Size = New System.Drawing.Size(163, 26)
+        Me.cboWeeklyStatus.Size = New System.Drawing.Size(147, 26)
         Me.cboWeeklyStatus.TabIndex = 1
         '
         'dtWeekly
         '
+        Me.dtWeekly.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.dtWeekly.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtWeekly.Location = New System.Drawing.Point(152, 72)
+        Me.dtWeekly.Location = New System.Drawing.Point(152, 66)
         Me.dtWeekly.Name = "dtWeekly"
         Me.dtWeekly.ShowUpDown = True
         Me.dtWeekly.Size = New System.Drawing.Size(147, 26)
@@ -299,10 +314,6 @@ Partial Class RedSkyConfiguration
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.lblDailyTo)
-        Me.GroupBox1.Controls.Add(Me.lblDailyFrom)
-        Me.GroupBox1.Controls.Add(Me.dtDailyTo)
-        Me.GroupBox1.Controls.Add(Me.dtDailyFrom)
         Me.GroupBox1.Controls.Add(Me.Label2)
         Me.GroupBox1.Controls.Add(Me.lblDailyGenerationTime)
         Me.GroupBox1.Controls.Add(Me.lblDailyNextReport)
@@ -310,53 +321,18 @@ Partial Class RedSkyConfiguration
         Me.GroupBox1.Controls.Add(Me.cboDailyStatus)
         Me.GroupBox1.Controls.Add(Me.dtDaily)
         Me.GroupBox1.Dock = System.Windows.Forms.DockStyle.Top
-        Me.GroupBox1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.GroupBox1.Location = New System.Drawing.Point(3, 3)
+        Me.GroupBox1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
+        Me.GroupBox1.Location = New System.Drawing.Point(3, 105)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(610, 125)
+        Me.GroupBox1.Size = New System.Drawing.Size(610, 101)
         Me.GroupBox1.TabIndex = 0
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Daily Summary Report"
         '
-        'lblDailyTo
-        '
-        Me.lblDailyTo.AutoSize = True
-        Me.lblDailyTo.Location = New System.Drawing.Point(341, 66)
-        Me.lblDailyTo.Name = "lblDailyTo"
-        Me.lblDailyTo.Size = New System.Drawing.Size(63, 18)
-        Me.lblDailyTo.TabIndex = 9
-        Me.lblDailyTo.Text = "Daily To: "
-        '
-        'lblDailyFrom
-        '
-        Me.lblDailyFrom.AutoSize = True
-        Me.lblDailyFrom.Location = New System.Drawing.Point(323, 32)
-        Me.lblDailyFrom.Name = "lblDailyFrom"
-        Me.lblDailyFrom.Size = New System.Drawing.Size(81, 18)
-        Me.lblDailyFrom.TabIndex = 8
-        Me.lblDailyFrom.Text = "Daily From: "
-        '
-        'dtDailyTo
-        '
-        Me.dtDailyTo.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtDailyTo.Location = New System.Drawing.Point(410, 60)
-        Me.dtDailyTo.Name = "dtDailyTo"
-        Me.dtDailyTo.ShowUpDown = True
-        Me.dtDailyTo.Size = New System.Drawing.Size(163, 26)
-        Me.dtDailyTo.TabIndex = 7
-        '
-        'dtDailyFrom
-        '
-        Me.dtDailyFrom.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtDailyFrom.Location = New System.Drawing.Point(410, 26)
-        Me.dtDailyFrom.Name = "dtDailyFrom"
-        Me.dtDailyFrom.ShowUpDown = True
-        Me.dtDailyFrom.Size = New System.Drawing.Size(163, 26)
-        Me.dtDailyFrom.TabIndex = 6
-        '
         'Label2
         '
         Me.Label2.AutoSize = True
+        Me.Label2.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.Label2.Location = New System.Drawing.Point(87, 63)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(53, 18)
@@ -366,6 +342,7 @@ Partial Class RedSkyConfiguration
         'lblDailyGenerationTime
         '
         Me.lblDailyGenerationTime.AutoSize = True
+        Me.lblDailyGenerationTime.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.lblDailyGenerationTime.Location = New System.Drawing.Point(6, 32)
         Me.lblDailyGenerationTime.Name = "lblDailyGenerationTime"
         Me.lblDailyGenerationTime.Size = New System.Drawing.Size(134, 18)
@@ -377,7 +354,7 @@ Partial Class RedSkyConfiguration
         Me.lblDailyNextReport.AutoSize = True
         Me.lblDailyNextReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblDailyNextReport.ForeColor = System.Drawing.Color.DarkGreen
-        Me.lblDailyNextReport.Location = New System.Drawing.Point(356, 99)
+        Me.lblDailyNextReport.Location = New System.Drawing.Point(356, 63)
         Me.lblDailyNextReport.Name = "lblDailyNextReport"
         Me.lblDailyNextReport.Size = New System.Drawing.Size(48, 18)
         Me.lblDailyNextReport.TabIndex = 3
@@ -388,7 +365,7 @@ Partial Class RedSkyConfiguration
         Me.lblDailyLastReport.AutoSize = True
         Me.lblDailyLastReport.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblDailyLastReport.ForeColor = System.Drawing.Color.DarkGreen
-        Me.lblDailyLastReport.Location = New System.Drawing.Point(87, 99)
+        Me.lblDailyLastReport.Location = New System.Drawing.Point(356, 32)
         Me.lblDailyLastReport.Name = "lblDailyLastReport"
         Me.lblDailyLastReport.Size = New System.Drawing.Size(48, 18)
         Me.lblDailyLastReport.TabIndex = 2
@@ -396,6 +373,7 @@ Partial Class RedSkyConfiguration
         '
         'cboDailyStatus
         '
+        Me.cboDailyStatus.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.cboDailyStatus.FormattingEnabled = True
         Me.cboDailyStatus.Items.AddRange(New Object() {"ENABLED", "DISABLED"})
         Me.cboDailyStatus.Location = New System.Drawing.Point(152, 60)
@@ -405,12 +383,70 @@ Partial Class RedSkyConfiguration
         '
         'dtDaily
         '
+        Me.dtDaily.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.dtDaily.Format = System.Windows.Forms.DateTimePickerFormat.Time
         Me.dtDaily.Location = New System.Drawing.Point(152, 26)
         Me.dtDaily.Name = "dtDaily"
         Me.dtDaily.ShowUpDown = True
         Me.dtDaily.Size = New System.Drawing.Size(147, 26)
         Me.dtDaily.TabIndex = 0
+        '
+        'GroupBox4
+        '
+        Me.GroupBox4.Controls.Add(Me.txtOtherConfigurationDomain)
+        Me.GroupBox4.Controls.Add(Me.lblOtherConfigurationDomain)
+        Me.GroupBox4.Controls.Add(Me.lblDailyTo)
+        Me.GroupBox4.Controls.Add(Me.lblDailyFrom)
+        Me.GroupBox4.Controls.Add(Me.dtDailyFrom)
+        Me.GroupBox4.Controls.Add(Me.dtDailyTo)
+        Me.GroupBox4.Dock = System.Windows.Forms.DockStyle.Top
+        Me.GroupBox4.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.GroupBox4.Location = New System.Drawing.Point(3, 3)
+        Me.GroupBox4.Name = "GroupBox4"
+        Me.GroupBox4.Size = New System.Drawing.Size(610, 102)
+        Me.GroupBox4.TabIndex = 4
+        Me.GroupBox4.TabStop = False
+        Me.GroupBox4.Text = "Filters"
+        '
+        'lblDailyTo
+        '
+        Me.lblDailyTo.AutoSize = True
+        Me.lblDailyTo.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblDailyTo.Location = New System.Drawing.Point(77, 66)
+        Me.lblDailyTo.Name = "lblDailyTo"
+        Me.lblDailyTo.Size = New System.Drawing.Size(63, 18)
+        Me.lblDailyTo.TabIndex = 9
+        Me.lblDailyTo.Text = "Daily To: "
+        '
+        'lblDailyFrom
+        '
+        Me.lblDailyFrom.AutoSize = True
+        Me.lblDailyFrom.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblDailyFrom.Location = New System.Drawing.Point(59, 31)
+        Me.lblDailyFrom.Name = "lblDailyFrom"
+        Me.lblDailyFrom.Size = New System.Drawing.Size(81, 18)
+        Me.lblDailyFrom.TabIndex = 8
+        Me.lblDailyFrom.Text = "Daily From: "
+        '
+        'dtDailyFrom
+        '
+        Me.dtDailyFrom.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.dtDailyFrom.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtDailyFrom.Location = New System.Drawing.Point(152, 25)
+        Me.dtDailyFrom.Name = "dtDailyFrom"
+        Me.dtDailyFrom.ShowUpDown = True
+        Me.dtDailyFrom.Size = New System.Drawing.Size(147, 26)
+        Me.dtDailyFrom.TabIndex = 6
+        '
+        'dtDailyTo
+        '
+        Me.dtDailyTo.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.dtDailyTo.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtDailyTo.Location = New System.Drawing.Point(152, 60)
+        Me.dtDailyTo.Name = "dtDailyTo"
+        Me.dtDailyTo.ShowUpDown = True
+        Me.dtDailyTo.Size = New System.Drawing.Size(147, 26)
+        Me.dtDailyTo.TabIndex = 7
         '
         'TabPage2
         '
@@ -430,7 +466,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage2.Location = New System.Drawing.Point(4, 27)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(616, 439)
+        Me.TabPage2.Size = New System.Drawing.Size(616, 545)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Mailing Configuration"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -556,7 +592,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage3.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabPage3.Location = New System.Drawing.Point(4, 27)
         Me.TabPage3.Name = "TabPage3"
-        Me.TabPage3.Size = New System.Drawing.Size(616, 439)
+        Me.TabPage3.Size = New System.Drawing.Size(616, 545)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "Mailing List"
         Me.TabPage3.UseVisualStyleBackColor = True
@@ -685,18 +721,36 @@ Partial Class RedSkyConfiguration
         Me.gvMailingList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
         Me.gvMailingList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.gvMailingList.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.gvMailingList.Location = New System.Drawing.Point(0, 101)
+        Me.gvMailingList.Location = New System.Drawing.Point(0, 207)
         Me.gvMailingList.Name = "gvMailingList"
         Me.gvMailingList.ReadOnly = True
         Me.gvMailingList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
         Me.gvMailingList.Size = New System.Drawing.Size(616, 338)
         Me.gvMailingList.TabIndex = 0
         '
+        'lblOtherConfigurationDomain
+        '
+        Me.lblOtherConfigurationDomain.AutoSize = True
+        Me.lblOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblOtherConfigurationDomain.Location = New System.Drawing.Point(356, 31)
+        Me.lblOtherConfigurationDomain.Name = "lblOtherConfigurationDomain"
+        Me.lblOtherConfigurationDomain.Size = New System.Drawing.Size(63, 18)
+        Me.lblOtherConfigurationDomain.TabIndex = 10
+        Me.lblOtherConfigurationDomain.Text = "Domain: "
+        '
+        'txtOtherConfigurationDomain
+        '
+        Me.txtOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.txtOtherConfigurationDomain.Location = New System.Drawing.Point(425, 23)
+        Me.txtOtherConfigurationDomain.Name = "txtOtherConfigurationDomain"
+        Me.txtOtherConfigurationDomain.Size = New System.Drawing.Size(148, 26)
+        Me.txtOtherConfigurationDomain.TabIndex = 11
+        '
         'RedSkyConfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(624, 470)
+        Me.ClientSize = New System.Drawing.Size(624, 554)
         Me.Controls.Add(Me.TabControl1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
@@ -711,6 +765,8 @@ Partial Class RedSkyConfiguration
         Me.GroupBox2.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.GroupBox4.ResumeLayout(False)
+        Me.GroupBox4.PerformLayout()
         Me.TabPage2.ResumeLayout(False)
         Me.TabPage2.PerformLayout()
         Me.TabPage3.ResumeLayout(False)
@@ -777,4 +833,7 @@ Partial Class RedSkyConfiguration
     Friend WithEvents dtDailyFrom As DateTimePicker
     Friend WithEvents lblWeeklyDay As Label
     Friend WithEvents cboWeeklyDay As ComboBox
+    Friend WithEvents GroupBox4 As GroupBox
+    Friend WithEvents txtOtherConfigurationDomain As TextBox
+    Friend WithEvents lblOtherConfigurationDomain As Label
 End Class

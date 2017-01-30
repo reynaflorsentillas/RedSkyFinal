@@ -40,10 +40,12 @@ Public Class RedSkyMain
 
     Dim today As DateTime
 
+    Dim filterDomain As String = ""
+
     Private Sub RedSkyMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         GetReportConfiguration()
         GetMailingConfiguration()
-        'GetOtherConfiguration()
+        GetOtherConfiguration()
         GetMailingList()
         SetRunStatus("STOP")
         btnStopReports.Enabled = False
@@ -669,28 +671,27 @@ Public Class RedSkyMain
         End Try
     End Sub
 
-    'Private Sub GetOtherConfiguration()
-    '    Try
-    '        conn.ConnectionString = connectionString
-    '        conn.Open()
-    '        cmd.Connection = conn
-    '        cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
-    '        cmd.Parameters.AddWithValue("@ConfigName", "Reports Location")
-    '        reader = cmd.ExecuteReader
-    '        If reader.HasRows Then
-    '            Do While reader.Read
-    '                reportsLocation = reader.GetValue(2).ToString
-    '            Loop
-    '        End If
-    '        cmd.Parameters.Clear()
-    '        conn.Close()
-    '        conn.Dispose()
-    '    Catch ex As Exception
-    '        MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
-    '        conn.Close()
-    '        conn.Dispose()
-    '    End Try
-    'End Sub
+    Private Sub GetOtherConfiguration()
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
+            cmd.Parameters.AddWithValue("@ConfigName", "DOMAIN")
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                filterDomain = reader.GetValue(2).ToString
+            End If
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        Catch ex As Exception
+            WriteLog("OTHER CONFIGURATION: Error fetching configuration. " & ex.Message)
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        End Try
+    End Sub
 
     Private Sub btnConfiguration_Click(sender As Object, e As EventArgs) Handles btnConfiguration.Click
         Dim frm As New RedSkyConfiguration
@@ -700,7 +701,7 @@ Public Class RedSkyMain
     Private Sub btnReloadConfiguration_Click(sender As Object, e As EventArgs) Handles btnReloadConfiguration.Click
         GetReportConfiguration()
         GetMailingConfiguration()
-        'GetOtherConfiguration()
+        GetOtherConfiguration()
         SetRunStatus("STOP")
     End Sub
 
