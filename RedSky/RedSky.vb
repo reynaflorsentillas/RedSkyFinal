@@ -147,9 +147,9 @@ Public Class RedSky
                 conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
                 conn.Open()
                 cmd.Connection = conn
-                cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, ModifiedDate = @ModifiedDate WHERE Domain = @Domain AND Username = @Username AND isLogin = 1"
+                cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, DateModified = @DateModified WHERE Domain = @Domain AND Username = @Username AND isLogin = 1"
                 cmd.Parameters.AddWithValue("@Remarks", remarks)
-                cmd.Parameters.AddWithValue("@ModifiedDate", DateTime.UtcNow.AddHours(8))
+                cmd.Parameters.AddWithValue("@DateModified", DateTime.UtcNow.AddHours(8))
                 cmd.Parameters.AddWithValue("@Username", username)
                 cmd.Parameters.AddWithValue("@Domain", domain)
                 cmd.ExecuteNonQuery()
