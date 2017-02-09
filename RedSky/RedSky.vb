@@ -323,6 +323,8 @@ Public Class RedSky
             EventLog1.WriteEntry("Force logoff implemented for user " & username & " in computer " & machinename & ". Goodbye.", EventLogEntryType.Information, eventId)
             eventId += 1
             'Process.Start(batPath & batFilename)
+            Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()
+            LogOffUser(currentSessionId)
         End If
     End Sub
 
@@ -334,12 +336,12 @@ Public Class RedSky
         EventLog1.WriteEntry(currentDomain & " " & currentUser & " " & currentMachine, EventLogEntryType.Information, eventId)
         eventId += 1
 
-        Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()
+        'Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()
 
-        Dim user As String = GetUsernameBySessionId(currentSessionId)
-        EventLog1.WriteEntry(user)
+        'Dim user As String = GetUsernameBySessionId(currentSessionId)
+        'EventLog1.WriteEntry(user)
 
-        LogOffUser(currentSessionId)
+        'LogOffUser(currentSessionId)
     End Sub
 
     <DllImport("Wtsapi32.dll")>
