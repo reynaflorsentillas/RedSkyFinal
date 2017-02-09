@@ -361,6 +361,10 @@ Public Class RedSky
     Private Shared Function WTSDisconnectSession(hServer As IntPtr, sessionID As UInt32, bWait As Int32) As Boolean
     End Function
 
+    <DllImport("wtsapi32.dll", SetLastError:=True)>
+    Private Shared Function WTSLogoffSession(hServer As IntPtr, SessionId As Integer, bWait As Boolean) As Boolean
+    End Function
+
     Public Shared Function GetUsernameBySessionId(sessionId As Integer) As [String]
         Dim buffer As IntPtr
         Dim strLen As Integer
@@ -382,7 +386,8 @@ Public Class RedSky
     Public Sub LogOffUser(sessionId As Integer)
         'Dim WTS_CURRENT_SESSION As UInt32 = UInt32.MaxValue
         Dim WTS_CURRENT_SERVER_HANDLE As New IntPtr()
-        WTSDisconnectSession(WTS_CURRENT_SERVER_HANDLE, sessionId, 0)
+        'WTSDisconnectSession(WTS_CURRENT_SERVER_HANDLE, sessionId, 0)
+        WTSLogoffSession(WTS_CURRENT_SERVER_HANDLE, sessionId, 0)
     End Sub
 
 
