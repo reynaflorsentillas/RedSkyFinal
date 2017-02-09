@@ -7,8 +7,6 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RedSky", "RedSky\RedSky.vbp
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RedSkyReports", "RedSkyReports\RedSkyReports.vbproj", "{3A8D0543-3EA7-467A-BBDB-8942E08B3B63}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RedSkyReportsService", "RedSkyReportsService\RedSkyReportsService.vbproj", "{D1381625-C954-4C64-A25F-9997A7F473AC}"
-EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RedSkySetup", "RedSkySetup\RedSkySetup.vdproj", "{A4BD24E7-664F-478F-A279-8B8FBB74A357}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RedSkyReportsSetup", "RedSkyReportsSetup\RedSkyReportsSetup.vdproj", "{68BD5263-B4E3-4712-8253-F9392D6E40CC}"
@@ -27,10 +25,6 @@ Global
 		{3A8D0543-3EA7-467A-BBDB-8942E08B3B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A8D0543-3EA7-467A-BBDB-8942E08B3B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A8D0543-3EA7-467A-BBDB-8942E08B3B63}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1381625-C954-4C64-A25F-9997A7F473AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1381625-C954-4C64-A25F-9997A7F473AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1381625-C954-4C64-A25F-9997A7F473AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1381625-C954-4C64-A25F-9997A7F473AC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4BD24E7-664F-478F-A279-8B8FBB74A357}.Debug|Any CPU.ActiveCfg = Debug
 		{A4BD24E7-664F-478F-A279-8B8FBB74A357}.Release|Any CPU.ActiveCfg = Release
 		{68BD5263-B4E3-4712-8253-F9392D6E40CC}.Debug|Any CPU.ActiveCfg = Debug
