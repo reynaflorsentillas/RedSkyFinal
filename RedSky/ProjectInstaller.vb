@@ -20,4 +20,5 @@ Public Class ProjectInstaller
             serviceController.Start()
         End Using
     End Sub
+
 End Class

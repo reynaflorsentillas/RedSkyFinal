@@ -32,7 +32,7 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.RedSkyReports.RedSkyMain
+            Me.MainForm = Global.RedSkyReports.Form1
         End Sub
     End Class
 End Namespace
