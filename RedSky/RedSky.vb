@@ -112,9 +112,9 @@ Public Class RedSky
     End Sub
 
     Private Sub CheckAgentLogin(domain As String, username As String, machinename As String)
-        conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
         Dim setForceLogOff As Integer = 0
         Try
+            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
             conn.Open()
             cmd.Connection = conn
             cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Username = @Username AND isLogin = 1"
@@ -144,6 +144,7 @@ Public Class RedSky
             Dim remarks As String
             remarks = "No multiple login allowed for " & domain & "\" & username & ". User is currently loggedin on " & machinename & ". Force log off implemented."
             Try
+                conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
                 conn.Open()
                 cmd.Connection = conn
                 cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, ModifiedDate = @ModifiedDate WHERE Domain = @Domain AND Username = @Username AND isLogin = 1"
