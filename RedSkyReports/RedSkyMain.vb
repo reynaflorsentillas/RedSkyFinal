@@ -232,10 +232,6 @@ Public Class RedSkyMain
                     xlWorksheet.Range("C5").Value = "SEATS USED"
                     xlWorksheet.Range("D5").Value = "USERNAME"
                     xlWorksheet.Range("E5").Value = "WORDKSTATION"
-                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
-                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
-                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
-                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
 
                     Dim rowCount As Integer = 6
 
@@ -364,24 +360,13 @@ Public Class RedSkyMain
 
                     xlWorksheet.Range("A2").Value = "DATE"
                     xlWorksheet.Range("B2").Value = "NUMBER OF SEATS"
-                    'xlWorksheet.Range("C1").Value = "WORKSTATION"
-                    'xlWorksheet.Range("D1").Value = "LOGIN DATE"
-                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
-                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
-                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
-                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
 
                     Dim rowCount As Integer = 3
 
                     Do While reader.Read
                         xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
                         xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
-                        'xlWorksheet.Cells(rowCount, 3) = reader.GetValue(2).ToString
-                        'xlWorksheet.Cells(rowCount, 4) = reader.GetDateTime(3).ToShortDateString
-                        'xlWorksheet.Cells(rowCount, 5) = reader.GetDateTime(4).ToString
-                        'xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(5), Nothing, reader.GetDateTime(5).ToShortDateString)
-                        'xlWorksheet.Cells(rowCount, 7) = reader.GetValue(6).ToString
-                        'xlWorksheet.Cells(rowCount, 8) = reader.GetValue(7).ToString
+
                         rowCount += 1
                         seats += reader.GetValue(1)
                     Loop
@@ -501,24 +486,13 @@ Public Class RedSkyMain
 
                     xlWorksheet.Range("A5").Value = "LOGIN DATE"
                     xlWorksheet.Range("B5").Value = "NUMBER OF SEATS"
-                    'xlWorksheet.Range("C1").Value = "WORKSTATION"
-                    'xlWorksheet.Range("D1").Value = "LOGIN DATE"
-                    'xlWorksheet.Range("E1").Value = "LOGIN TIME"
-                    'xlWorksheet.Range("F1").Value = "LOGOUT DATE"
-                    'xlWorksheet.Range("G1").Value = "LOGOUT TIME"
-                    'xlWorksheet.Range("H1").Value = "LOGIN DURATION"
 
                     Dim rowCount As Integer = 6
 
                     Do While reader.Read
                         xlWorksheet.Cells(rowCount, 1) = reader.GetValue(0)
                         xlWorksheet.Cells(rowCount, 2) = reader.GetValue(1)
-                        'xlWorksheet.Cells(rowCount, 3) = reader.GetValue(2).ToString
-                        'xlWorksheet.Cells(rowCount, 4) = reader.GetDateTime(3).ToShortDateString
-                        'xlWorksheet.Cells(rowCount, 5) = reader.GetDateTime(4).ToString
-                        'xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(5), Nothing, reader.GetDateTime(5).ToShortDateString)
-                        'xlWorksheet.Cells(rowCount, 7) = reader.GetValue(6).ToString
-                        'xlWorksheet.Cells(rowCount, 8) = reader.GetValue(7).ToString
+
                         rowCount += 1
                         seats += reader.GetValue(1)
                     Loop
