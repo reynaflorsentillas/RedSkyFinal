@@ -206,10 +206,11 @@ Public Class RedSkyMain
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "SELECT LoginDate, LoginTime, COUNT(Username), Username, Workstation FROM AgentLogin WHERE Domain = @Domain AND LoginTime BETWEEN @dateFrom AND @dateTo GROUP	BY LoginDate, LoginTime, Username, Workstation"
+            cmd.CommandText = "SELECT LoginDate, LoginTime, COUNT(Username), Username, Workstation FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND LoginTime BETWEEN @dateFrom AND @dateTo GROUP	BY LoginDate, LoginTime, Username, Workstation"
             cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
             cmd.Parameters.AddWithValue("@dateTo", dateTo)
             cmd.Parameters.AddWithValue("@Domain", filterDomain)
+            cmd.Parameters.AddWithValue("@Group", filterGroup)
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 'MsgBox("Has Data!")
@@ -333,10 +334,10 @@ Public Class RedSkyMain
 
             If nightShift = True Then
                 'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
             Else
                 'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
             End If
             'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo"
             cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
@@ -344,6 +345,7 @@ Public Class RedSkyMain
             cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
             cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
             cmd.Parameters.AddWithValue("@Domain", filterDomain)
+            cmd.Parameters.AddWithValue("@Group", filterGroup)
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 'MsgBox("Has Data!" & dateFrom.ToString & " " & dateTo.ToString)
@@ -469,10 +471,10 @@ Public Class RedSkyMain
             cmd.Connection = conn
             If nightShift = True Then
                 'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
             Else
                 'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
             End If
             'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo"
             cmd.Parameters.AddWithValue("@dateFrom", firstDayInMonth)
@@ -480,6 +482,7 @@ Public Class RedSkyMain
             cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
             cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
             cmd.Parameters.AddWithValue("@Domain", filterDomain)
+            cmd.Parameters.AddWithValue("@Group", filterGroup)
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 'MsgBox("Has Data!" & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
