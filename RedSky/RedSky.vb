@@ -120,20 +120,13 @@ Public Class RedSky
             cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Username = @Username AND isLogin = 1"
             cmd.Parameters.AddWithValue("@Username", username)
             cmd.Parameters.AddWithValue("@Domain", domain)
-            'cmd.ExecuteNonQuery()
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 setForceLogOff = 1
             End If
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Catch ex As Exception
             EventLog1.WriteEntry("Error while fetching record on table. " + ex.Message, EventLogEntryType.Error, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Finally
             cmd.Parameters.Clear()
             conn.Close()
@@ -155,15 +148,9 @@ Public Class RedSky
                 cmd.ExecuteNonQuery()
                 EventLog1.WriteEntry(remarks, EventLogEntryType.Information, eventId)
                 eventId += 1
-                ''cmd.Parameters.Clear()
-                ''conn.Close()
-                ''conn.Dispose()
             Catch ex As Exception
                 EventLog1.WriteEntry("Error while updating record on table. " + ex.Message, EventLogEntryType.Error, eventId)
                 eventId += 1
-                'cmd.Parameters.Clear()
-                'conn.Close()
-                'conn.Dispose()
             Finally
                 cmd.Parameters.Clear()
                 conn.Close()
@@ -187,15 +174,9 @@ Public Class RedSky
             cmd.ExecuteNonQuery()
             EventLog1.WriteEntry("New login from " + domain + "\" + username + " in " + machinename + ". " + agentlogin, EventLogEntryType.Information, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Catch ex As Exception
             EventLog1.WriteEntry("Error while inserting record on table. " + ex.Message, EventLogEntryType.Error, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Finally
             cmd.Parameters.Clear()
             conn.Close()
@@ -223,15 +204,9 @@ Public Class RedSky
             cmd.ExecuteNonQuery()
             EventLog1.WriteEntry(username + " logged out in " + machinename + ". " + agentlogout, EventLogEntryType.Information, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Catch ex As Exception
             EventLog1.WriteEntry("Error while updating record on table. " + ex.Message, EventLogEntryType.Error, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Finally
             cmd.Parameters.Clear()
             conn.Close()
@@ -270,15 +245,9 @@ Public Class RedSky
             cmd.ExecuteNonQuery()
             EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Catch ex As Exception
             EventLog1.WriteEntry("Error while updating record on table. " + ex.Message, EventLogEntryType.Error, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Finally
             cmd.Parameters.Clear()
             conn.Close()
@@ -303,15 +272,9 @@ Public Class RedSky
                 'Else
                 '    EventLog1.WriteEntry("No Rows", EventLogEntryType.Information, eventId)
             End If
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Catch ex As Exception
             EventLog1.WriteEntry("Error while fetching record on table. " + ex.Message, EventLogEntryType.Error, eventId)
             eventId += 1
-            'cmd.Parameters.Clear()
-            'conn.Close()
-            'conn.Dispose()
         Finally
             cmd.Parameters.Clear()
             conn.Close()
