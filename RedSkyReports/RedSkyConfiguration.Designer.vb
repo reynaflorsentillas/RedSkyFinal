@@ -49,8 +49,6 @@ Partial Class RedSkyConfiguration
         Me.cboDailyStatus = New System.Windows.Forms.ComboBox()
         Me.dtDaily = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
-        Me.txtOtherConfigurationDomain = New System.Windows.Forms.TextBox()
-        Me.lblOtherConfigurationDomain = New System.Windows.Forms.Label()
         Me.lblDailyTo = New System.Windows.Forms.Label()
         Me.lblDailyFrom = New System.Windows.Forms.Label()
         Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
@@ -83,6 +81,11 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListEmailAddress = New System.Windows.Forms.Label()
         Me.gvMailingList = New System.Windows.Forms.DataGridView()
         Me.TabPage4 = New System.Windows.Forms.TabPage()
+        Me.txtOtherConfigurationGroup = New System.Windows.Forms.TextBox()
+        Me.lblOtherConfigurationGroup = New System.Windows.Forms.Label()
+        Me.btnSaveOtherConfiguration = New System.Windows.Forms.Button()
+        Me.txtOtherConfigurationDomain = New System.Windows.Forms.TextBox()
+        Me.lblOtherConfigurationDomain = New System.Windows.Forms.Label()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -92,6 +95,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage2.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TabPage4.SuspendLayout()
         Me.SuspendLayout()
         '
         'TabControl1
@@ -144,7 +148,7 @@ Partial Class RedSkyConfiguration
         Me.GroupBox3.Controls.Add(Me.dtMonthly)
         Me.GroupBox3.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox3.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
-        Me.GroupBox3.Location = New System.Drawing.Point(3, 346)
+        Me.GroupBox3.Location = New System.Drawing.Point(3, 322)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(610, 125)
         Me.GroupBox3.TabIndex = 2
@@ -225,7 +229,7 @@ Partial Class RedSkyConfiguration
         Me.GroupBox2.Controls.Add(Me.dtWeekly)
         Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox2.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
-        Me.GroupBox2.Location = New System.Drawing.Point(3, 206)
+        Me.GroupBox2.Location = New System.Drawing.Point(3, 182)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(610, 140)
         Me.GroupBox2.TabIndex = 1
@@ -324,7 +328,7 @@ Partial Class RedSkyConfiguration
         Me.GroupBox1.Controls.Add(Me.dtDaily)
         Me.GroupBox1.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold)
-        Me.GroupBox1.Location = New System.Drawing.Point(3, 105)
+        Me.GroupBox1.Location = New System.Drawing.Point(3, 81)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Size = New System.Drawing.Size(610, 101)
         Me.GroupBox1.TabIndex = 0
@@ -395,8 +399,6 @@ Partial Class RedSkyConfiguration
         '
         'GroupBox4
         '
-        Me.GroupBox4.Controls.Add(Me.txtOtherConfigurationDomain)
-        Me.GroupBox4.Controls.Add(Me.lblOtherConfigurationDomain)
         Me.GroupBox4.Controls.Add(Me.lblDailyTo)
         Me.GroupBox4.Controls.Add(Me.lblDailyFrom)
         Me.GroupBox4.Controls.Add(Me.dtDailyFrom)
@@ -405,34 +407,16 @@ Partial Class RedSkyConfiguration
         Me.GroupBox4.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox4.Location = New System.Drawing.Point(3, 3)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(610, 102)
+        Me.GroupBox4.Size = New System.Drawing.Size(610, 78)
         Me.GroupBox4.TabIndex = 4
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Filters"
-        '
-        'txtOtherConfigurationDomain
-        '
-        Me.txtOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
-        Me.txtOtherConfigurationDomain.Location = New System.Drawing.Point(425, 23)
-        Me.txtOtherConfigurationDomain.Name = "txtOtherConfigurationDomain"
-        Me.txtOtherConfigurationDomain.Size = New System.Drawing.Size(148, 26)
-        Me.txtOtherConfigurationDomain.TabIndex = 11
-        '
-        'lblOtherConfigurationDomain
-        '
-        Me.lblOtherConfigurationDomain.AutoSize = True
-        Me.lblOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
-        Me.lblOtherConfigurationDomain.Location = New System.Drawing.Point(356, 31)
-        Me.lblOtherConfigurationDomain.Name = "lblOtherConfigurationDomain"
-        Me.lblOtherConfigurationDomain.Size = New System.Drawing.Size(63, 18)
-        Me.lblOtherConfigurationDomain.TabIndex = 10
-        Me.lblOtherConfigurationDomain.Text = "Domain: "
         '
         'lblDailyTo
         '
         Me.lblDailyTo.AutoSize = True
         Me.lblDailyTo.Font = New System.Drawing.Font("Calibri", 11.25!)
-        Me.lblDailyTo.Location = New System.Drawing.Point(77, 66)
+        Me.lblDailyTo.Location = New System.Drawing.Point(356, 31)
         Me.lblDailyTo.Name = "lblDailyTo"
         Me.lblDailyTo.Size = New System.Drawing.Size(63, 18)
         Me.lblDailyTo.TabIndex = 9
@@ -462,7 +446,7 @@ Partial Class RedSkyConfiguration
         '
         Me.dtDailyTo.Font = New System.Drawing.Font("Calibri", 11.25!)
         Me.dtDailyTo.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtDailyTo.Location = New System.Drawing.Point(152, 60)
+        Me.dtDailyTo.Location = New System.Drawing.Point(431, 25)
         Me.dtDailyTo.Name = "dtDailyTo"
         Me.dtDailyTo.ShowUpDown = True
         Me.dtDailyTo.Size = New System.Drawing.Size(147, 26)
@@ -750,12 +734,63 @@ Partial Class RedSkyConfiguration
         '
         'TabPage4
         '
+        Me.TabPage4.Controls.Add(Me.txtOtherConfigurationDomain)
+        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationDomain)
+        Me.TabPage4.Controls.Add(Me.btnSaveOtherConfiguration)
+        Me.TabPage4.Controls.Add(Me.txtOtherConfigurationGroup)
+        Me.TabPage4.Controls.Add(Me.lblOtherConfigurationGroup)
         Me.TabPage4.Location = New System.Drawing.Point(4, 27)
         Me.TabPage4.Name = "TabPage4"
         Me.TabPage4.Size = New System.Drawing.Size(616, 523)
         Me.TabPage4.TabIndex = 3
         Me.TabPage4.Text = "Other Configuration"
         Me.TabPage4.UseVisualStyleBackColor = True
+        '
+        'txtOtherConfigurationGroup
+        '
+        Me.txtOtherConfigurationGroup.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.txtOtherConfigurationGroup.Location = New System.Drawing.Point(236, 80)
+        Me.txtOtherConfigurationGroup.Name = "txtOtherConfigurationGroup"
+        Me.txtOtherConfigurationGroup.Size = New System.Drawing.Size(148, 26)
+        Me.txtOtherConfigurationGroup.TabIndex = 13
+        '
+        'lblOtherConfigurationGroup
+        '
+        Me.lblOtherConfigurationGroup.AutoSize = True
+        Me.lblOtherConfigurationGroup.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblOtherConfigurationGroup.Location = New System.Drawing.Point(167, 88)
+        Me.lblOtherConfigurationGroup.Name = "lblOtherConfigurationGroup"
+        Me.lblOtherConfigurationGroup.Size = New System.Drawing.Size(53, 18)
+        Me.lblOtherConfigurationGroup.TabIndex = 12
+        Me.lblOtherConfigurationGroup.Text = "Group: "
+        '
+        'btnSaveOtherConfiguration
+        '
+        Me.btnSaveOtherConfiguration.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.btnSaveOtherConfiguration.Location = New System.Drawing.Point(400, 309)
+        Me.btnSaveOtherConfiguration.Name = "btnSaveOtherConfiguration"
+        Me.btnSaveOtherConfiguration.Size = New System.Drawing.Size(117, 39)
+        Me.btnSaveOtherConfiguration.TabIndex = 14
+        Me.btnSaveOtherConfiguration.Text = "Save"
+        Me.btnSaveOtherConfiguration.UseVisualStyleBackColor = True
+        '
+        'txtOtherConfigurationDomain
+        '
+        Me.txtOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.txtOtherConfigurationDomain.Location = New System.Drawing.Point(236, 39)
+        Me.txtOtherConfigurationDomain.Name = "txtOtherConfigurationDomain"
+        Me.txtOtherConfigurationDomain.Size = New System.Drawing.Size(148, 26)
+        Me.txtOtherConfigurationDomain.TabIndex = 16
+        '
+        'lblOtherConfigurationDomain
+        '
+        Me.lblOtherConfigurationDomain.AutoSize = True
+        Me.lblOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblOtherConfigurationDomain.Location = New System.Drawing.Point(167, 47)
+        Me.lblOtherConfigurationDomain.Name = "lblOtherConfigurationDomain"
+        Me.lblOtherConfigurationDomain.Size = New System.Drawing.Size(63, 18)
+        Me.lblOtherConfigurationDomain.TabIndex = 15
+        Me.lblOtherConfigurationDomain.Text = "Domain: "
         '
         'RedSkyConfiguration
         '
@@ -783,6 +818,8 @@ Partial Class RedSkyConfiguration
         Me.TabPage3.ResumeLayout(False)
         Me.TabPage3.PerformLayout()
         CType(Me.gvMailingList, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TabPage4.ResumeLayout(False)
+        Me.TabPage4.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -845,7 +882,10 @@ Partial Class RedSkyConfiguration
     Friend WithEvents lblWeeklyDay As Label
     Friend WithEvents cboWeeklyDay As ComboBox
     Friend WithEvents GroupBox4 As GroupBox
+    Friend WithEvents TabPage4 As TabPage
+    Friend WithEvents btnSaveOtherConfiguration As Button
+    Friend WithEvents txtOtherConfigurationGroup As TextBox
+    Friend WithEvents lblOtherConfigurationGroup As Label
     Friend WithEvents txtOtherConfigurationDomain As TextBox
     Friend WithEvents lblOtherConfigurationDomain As Label
-    Friend WithEvents TabPage4 As TabPage
 End Class
