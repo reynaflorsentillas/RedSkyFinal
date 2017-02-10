@@ -49,6 +49,8 @@ Partial Class RedSkyConfiguration
         Me.cboDailyStatus = New System.Windows.Forms.ComboBox()
         Me.dtDaily = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.txtOtherConfigurationDomain = New System.Windows.Forms.TextBox()
+        Me.lblOtherConfigurationDomain = New System.Windows.Forms.Label()
         Me.lblDailyTo = New System.Windows.Forms.Label()
         Me.lblDailyFrom = New System.Windows.Forms.Label()
         Me.dtDailyFrom = New System.Windows.Forms.DateTimePicker()
@@ -80,8 +82,7 @@ Partial Class RedSkyConfiguration
         Me.lblMailingListStatus = New System.Windows.Forms.Label()
         Me.lblMailingListEmailAddress = New System.Windows.Forms.Label()
         Me.gvMailingList = New System.Windows.Forms.DataGridView()
-        Me.lblOtherConfigurationDomain = New System.Windows.Forms.Label()
-        Me.txtOtherConfigurationDomain = New System.Windows.Forms.TextBox()
+        Me.TabPage4 = New System.Windows.Forms.TabPage()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -98,6 +99,7 @@ Partial Class RedSkyConfiguration
         Me.TabControl1.Controls.Add(Me.TabPage1)
         Me.TabControl1.Controls.Add(Me.TabPage2)
         Me.TabControl1.Controls.Add(Me.TabPage3)
+        Me.TabControl1.Controls.Add(Me.TabPage4)
         Me.TabControl1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TabControl1.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
@@ -408,6 +410,24 @@ Partial Class RedSkyConfiguration
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Filters"
         '
+        'txtOtherConfigurationDomain
+        '
+        Me.txtOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.txtOtherConfigurationDomain.Location = New System.Drawing.Point(425, 23)
+        Me.txtOtherConfigurationDomain.Name = "txtOtherConfigurationDomain"
+        Me.txtOtherConfigurationDomain.Size = New System.Drawing.Size(148, 26)
+        Me.txtOtherConfigurationDomain.TabIndex = 11
+        '
+        'lblOtherConfigurationDomain
+        '
+        Me.lblOtherConfigurationDomain.AutoSize = True
+        Me.lblOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
+        Me.lblOtherConfigurationDomain.Location = New System.Drawing.Point(356, 31)
+        Me.lblOtherConfigurationDomain.Name = "lblOtherConfigurationDomain"
+        Me.lblOtherConfigurationDomain.Size = New System.Drawing.Size(63, 18)
+        Me.lblOtherConfigurationDomain.TabIndex = 10
+        Me.lblOtherConfigurationDomain.Text = "Domain: "
+        '
         'lblDailyTo
         '
         Me.lblDailyTo.AutoSize = True
@@ -466,7 +486,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage2.Location = New System.Drawing.Point(4, 27)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(616, 545)
+        Me.TabPage2.Size = New System.Drawing.Size(616, 523)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Mailing Configuration"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -592,7 +612,7 @@ Partial Class RedSkyConfiguration
         Me.TabPage3.Font = New System.Drawing.Font("Calibri", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TabPage3.Location = New System.Drawing.Point(4, 27)
         Me.TabPage3.Name = "TabPage3"
-        Me.TabPage3.Size = New System.Drawing.Size(616, 545)
+        Me.TabPage3.Size = New System.Drawing.Size(616, 523)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "Mailing List"
         Me.TabPage3.UseVisualStyleBackColor = True
@@ -721,30 +741,21 @@ Partial Class RedSkyConfiguration
         Me.gvMailingList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
         Me.gvMailingList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.gvMailingList.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.gvMailingList.Location = New System.Drawing.Point(0, 207)
+        Me.gvMailingList.Location = New System.Drawing.Point(0, 185)
         Me.gvMailingList.Name = "gvMailingList"
         Me.gvMailingList.ReadOnly = True
         Me.gvMailingList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
         Me.gvMailingList.Size = New System.Drawing.Size(616, 338)
         Me.gvMailingList.TabIndex = 0
         '
-        'lblOtherConfigurationDomain
+        'TabPage4
         '
-        Me.lblOtherConfigurationDomain.AutoSize = True
-        Me.lblOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
-        Me.lblOtherConfigurationDomain.Location = New System.Drawing.Point(356, 31)
-        Me.lblOtherConfigurationDomain.Name = "lblOtherConfigurationDomain"
-        Me.lblOtherConfigurationDomain.Size = New System.Drawing.Size(63, 18)
-        Me.lblOtherConfigurationDomain.TabIndex = 10
-        Me.lblOtherConfigurationDomain.Text = "Domain: "
-        '
-        'txtOtherConfigurationDomain
-        '
-        Me.txtOtherConfigurationDomain.Font = New System.Drawing.Font("Calibri", 11.25!)
-        Me.txtOtherConfigurationDomain.Location = New System.Drawing.Point(425, 23)
-        Me.txtOtherConfigurationDomain.Name = "txtOtherConfigurationDomain"
-        Me.txtOtherConfigurationDomain.Size = New System.Drawing.Size(148, 26)
-        Me.txtOtherConfigurationDomain.TabIndex = 11
+        Me.TabPage4.Location = New System.Drawing.Point(4, 27)
+        Me.TabPage4.Name = "TabPage4"
+        Me.TabPage4.Size = New System.Drawing.Size(616, 523)
+        Me.TabPage4.TabIndex = 3
+        Me.TabPage4.Text = "Other Configuration"
+        Me.TabPage4.UseVisualStyleBackColor = True
         '
         'RedSkyConfiguration
         '
@@ -836,4 +847,5 @@ Partial Class RedSkyConfiguration
     Friend WithEvents GroupBox4 As GroupBox
     Friend WithEvents txtOtherConfigurationDomain As TextBox
     Friend WithEvents lblOtherConfigurationDomain As Label
+    Friend WithEvents TabPage4 As TabPage
 End Class
