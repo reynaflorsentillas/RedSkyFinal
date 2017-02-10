@@ -38,7 +38,7 @@ Public Class RedSky
      ByRef ppBuffer As IntPtr,
      ByRef pCount As Int32) As Int32
 
-    'Dim connectionString As String = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+    Dim connectionString As String = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
     Dim conn As New SqlConnection
     Dim cmd As New SqlCommand
     Dim reader As SqlDataReader
@@ -55,6 +55,9 @@ Public Class RedSky
     'Dim localWorkstation As String = Environment.MachineName
     Dim currentMachine As String = ""
     Dim currentGroup As String = ""
+
+    Dim filterDomain As String = ""
+    Dim filterGroup As String = ""
 
 
     Protected Overrides Sub OnStart(ByVal args() As String)
@@ -106,7 +109,7 @@ Public Class RedSky
     Private Sub CheckAgentLogin(domain As String, group As String, username As String, machinename As String)
         Dim setForceLogOff As Integer = 0
         Try
-            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+            conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
             cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND isLogin = 1"
@@ -130,7 +133,7 @@ Public Class RedSky
             Dim remarks As String
             remarks = "No multiple login allowed for " & domain & "\" & username & ". User is currently loggedin on " & machinename & ". Force log off implemented."
             Try
-                conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+                conn.ConnectionString = connectionString
                 conn.Open()
                 cmd.Connection = conn
                 cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, DateModified = @DateModified WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND isLogin = 1"
@@ -155,7 +158,7 @@ Public Class RedSky
 
     Private Sub AgentLoginDBInsert(domain As String, group As String, username As String, machinename As String, agentlogin As DateTime)
         Try
-            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+            conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
             cmd.CommandText = "INSERT INTO AgentLogin(Domain, Group, Username, Workstation, LoginDate, LoginTime, isLogin, DateAdded) VALUES (@Domain, @Group, @Username, @Workstation, @LoginDate, @LoginTime, 1, @DateAdded)"
@@ -186,7 +189,7 @@ Public Class RedSky
 
     Private Sub AgentLogoutDBUpdate(domain As String, group As String, username As String, machinename As String, agentlogout As DateTime)
         Try
-            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+            conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
             cmd.CommandText = "UPDATE AgentLogin SET LogoutDate = @LogoutDate, LogoutTime = @LogoutTime, isLogin = 0,  DateModified = @DateModified WHERE Domain = @Domain AND Group = @Group AND Username = @LogoutUsername AND Workstation = @LogoutWorkstation AND isLogin = 1"
@@ -229,7 +232,7 @@ Public Class RedSky
 
     Private Sub AgentLoginDBUpdate(domain As String, group As String, username As String, machinename As String, loginDuration As String, currentDateTime As DateTime)
         Try
-            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
+            conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
             cmd.CommandText = "UPDATE AgentLogin SET LoginDuration = @LoginDuration, DateModified = @LoginDurationDateModified WHERE Domain = @Domain AND Group = @Group AND Username = @LoginDurationUsername AND Workstation = @LoginDurationWorkstation AND isLogin = 1"
@@ -253,40 +256,42 @@ Public Class RedSky
     End Sub
 
     Private Sub CheckForceLogOff(domain As String, group As String, username As String, machinename As String)
-        Dim forceLogOff As Integer = 0
-        Try
-            conn.ConnectionString = ConfigurationManager.ConnectionStrings("RedSkyConnectionString").ConnectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND Workstation = @Workstation AND isLogin = 1 AND ForceLogOff = 1"
-            cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("@Group", group)
-            cmd.Parameters.AddWithValue("@Username", username)
-            cmd.Parameters.AddWithValue("@Workstation", machinename)
-            reader = cmd.ExecuteReader
-            If reader.HasRows Then
-                forceLogOff = 1
-                '    EventLog1.WriteEntry("Has Rows", EventLogEntryType.Information, eventId)
-                'Else
-                '    EventLog1.WriteEntry("No Rows", EventLogEntryType.Information, eventId)
+        If domain.ToLower = filterDomain.ToLower And group.ToLower = filterGroup.ToLower Then
+            Dim forceLogOff As Integer = 0
+            Try
+                conn.ConnectionString = connectionString
+                conn.Open()
+                cmd.Connection = conn
+                cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND Workstation = @Workstation AND isLogin = 1 AND ForceLogOff = 1"
+                cmd.Parameters.AddWithValue("@Domain", domain)
+                cmd.Parameters.AddWithValue("@Group", group)
+                cmd.Parameters.AddWithValue("@Username", username)
+                cmd.Parameters.AddWithValue("@Workstation", machinename)
+                reader = cmd.ExecuteReader
+                If reader.HasRows Then
+                    forceLogOff = 1
+                    '    EventLog1.WriteEntry("Has Rows", EventLogEntryType.Information, eventId)
+                    'Else
+                    '    EventLog1.WriteEntry("No Rows", EventLogEntryType.Information, eventId)
+                End If
+            Catch ex As Exception
+                EventLog1.WriteEntry("Error while fetching record on table. " + ex.Message, EventLogEntryType.Error, eventId)
+                eventId += 1
+            Finally
+                cmd.Parameters.Clear()
+                conn.Close()
+                conn.Dispose()
+            End Try
+
+            'EventLog1.WriteEntry(forceLogOff.ToString, EventLogEntryType.Information, eventId)
+
+            If forceLogOff = 1 Then
+                EventLog1.WriteEntry("Force logoff implemented for user " & username & " in computer " & machinename & ". Goodbye.", EventLogEntryType.Information, eventId)
+                eventId += 1
+                'Process.Start(batPath & batFilename)
+                Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()
+                LogOffUser(currentSessionId)
             End If
-        Catch ex As Exception
-            EventLog1.WriteEntry("Error while fetching record on table. " + ex.Message, EventLogEntryType.Error, eventId)
-            eventId += 1
-        Finally
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
-
-        'EventLog1.WriteEntry(forceLogOff.ToString, EventLogEntryType.Information, eventId)
-
-        If forceLogOff = 1 Then
-            EventLog1.WriteEntry("Force logoff implemented for user " & username & " in computer " & machinename & ". Goodbye.", EventLogEntryType.Information, eventId)
-            eventId += 1
-            'Process.Start(batPath & batFilename)
-            Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()
-            LogOffUser(currentSessionId)
         End If
     End Sub
 
@@ -295,30 +300,36 @@ Public Class RedSky
         currentUser = Machine.getInstance().getUsername()
         currentMachine = System.Net.Dns.GetHostName.ToString
 
-        Dim dirEntry As New DirectoryEntry("LDAP://" & currentDomain)
-        Dim dirSearcher As New DirectorySearcher(dirEntry)
-        dirSearcher.SearchScope = SearchScope.Subtree
-        dirSearcher.Filter = String.Format("(&(objectClass=user)(|(cn={0})(sn={0}*)(givenName={0})(sAMAccountName={0}*)))", currentUser)
-        Dim searchResults = dirSearcher.FindAll()
+        Try
+            Dim dirEntry As New DirectoryEntry("LDAP://" & currentDomain)
+            Dim dirSearcher As New DirectorySearcher(dirEntry)
+            dirSearcher.SearchScope = SearchScope.Subtree
+            dirSearcher.Filter = String.Format("(&(objectClass=user)(|(cn={0})(sn={0}*)(givenName={0})(sAMAccountName={0}*)))", currentUser)
+            Dim searchResults = dirSearcher.FindAll()
 
-        For Each sr As SearchResult In searchResults
-            Dim de = sr.GetDirectoryEntry()
-            Dim words As String() = de.Path.ToString().Split(",")
-            Dim groups As String = ""
-            Dim count As Integer = 0
-            For Each item As String In words
-                If item.Contains("OU=") Then
-                    Dim group As String = item.ToString().Split(New String() {"OU="}, StringSplitOptions.None)(1)
-                    If count = 0 Then
-                        groups = group
-                    Else
-                        groups = group + "/" + groups
+            For Each sr As SearchResult In searchResults
+                Dim de = sr.GetDirectoryEntry()
+                Dim words As String() = de.Path.ToString().Split(",")
+                Dim groups As String = ""
+                Dim count As Integer = 0
+                For Each item As String In words
+                    If item.Contains("OU=") Then
+                        Dim group As String = item.ToString().Split(New String() {"OU="}, StringSplitOptions.None)(1)
+                        If count = 0 Then
+                            groups = group
+                        Else
+                            groups = group + "/" + groups
+                        End If
+                        count += 1
                     End If
-                    count += 1
-                End If
+                Next
+                currentGroup = groups
             Next
-            currentGroup = groups
-        Next
+        Catch ex As Exception
+            EventLog1.WriteEntry("Error while fetching group of user: " + currentUser + ". " + ex.Message, EventLogEntryType.Error, eventId)
+        End Try
+
+        GetOtherConfiguration()
 
         EventLog1.WriteEntry(currentDomain & " " & currentGroup & " " & currentUser & " " & currentMachine, EventLogEntryType.Information, eventId)
         eventId += 1
@@ -329,6 +340,31 @@ Public Class RedSky
         'EventLog1.WriteEntry(user)
 
         'LogOffUser(currentSessionId)
+    End Sub
+
+    Private Sub GetOtherConfiguration()
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "SELECT * FROM OtherConfiguration"
+            'cmd.Parameters.AddWithValue("@ConfigName", "DOMAIN")
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                Do While reader.Read
+                    If reader.GetValue(1).ToString = "DOMAIN" Then
+                        filterDomain = reader.GetValue(2).ToString
+                    ElseIf reader.GetValue(1).ToString = "GROUP" Then
+                        filterGroup = reader(2).ToString
+                    End If
+                Loop
+            End If
+        Catch ex As Exception
+            EventLog1.WriteEntry("Error while fetching record from table. " + ex.Message, EventLogEntryType.Error, eventId)
+        Finally
+            conn.Close()
+            conn.Dispose()
+        End Try
     End Sub
 
 
