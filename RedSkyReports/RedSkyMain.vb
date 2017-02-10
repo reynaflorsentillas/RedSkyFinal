@@ -41,6 +41,7 @@ Public Class RedSkyMain
     Dim today As DateTime
 
     Dim filterDomain As String = ""
+    Dim filterGroup As String = ""
 
     Dim currentMachine As String = System.Net.Dns.GetHostName.ToString
 
@@ -94,11 +95,9 @@ Public Class RedSkyMain
                     End If
                 Loop
             End If
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("Error fetching configuration. " & ex.Message)
-            'MsgBox("Error fetching configuration. " & ex.Message, MsgBoxStyle.Exclamation, "Report Configuration")
+        Finally
             conn.Close()
             conn.Dispose()
         End Try
@@ -275,11 +274,10 @@ Public Class RedSkyMain
                 'Else
                 'MsgBox("No Data! " & dateFrom & " " & dateTo)
             End If
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
             conn.Close()
             conn.Dispose()
         End Try
@@ -412,11 +410,10 @@ Public Class RedSkyMain
                 'Else
                 'MsgBox("No Data! " & dateFrom.ToString & " " & dateTo.ToString)
             End If
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
             conn.Close()
             conn.Dispose()
         End Try
@@ -549,11 +546,10 @@ Public Class RedSkyMain
                 'Else
                 'MsgBox("No Data! " & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
             End If
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("MONTHLY REPORT: Error generating report. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
             conn.Close()
             conn.Dispose()
         End Try
@@ -599,10 +595,9 @@ Public Class RedSkyMain
                     SMTPPassword = reader.GetValue(5).ToString
                 Loop
             End If
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("MAILING CONFIGURATION: Error fetching mailing configuration from table. " & ex.Message)
+        Finally
             conn.Close()
             conn.Dispose()
         End Try
@@ -625,10 +620,9 @@ Public Class RedSkyMain
                     End If
                 Loop
             End If
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("MAILING LIST: Error fetching mailing list from table. " & ex.Message)
+        Finally
             conn.Close()
             conn.Dispose()
         End Try
@@ -681,20 +675,21 @@ Public Class RedSkyMain
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "SELECT * FROM OtherConfiguration WHERE ConfigName = @ConfigName"
-            cmd.Parameters.AddWithValue("@ConfigName", "DOMAIN")
+            cmd.CommandText = "SELECT * FROM OtherConfiguration"
+            'cmd.Parameters.AddWithValue("@ConfigName", "DOMAIN")
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 Do While reader.Read
-                    filterDomain = reader.GetValue(2).ToString
+                    If reader.GetValue(1).ToString = "DOMAIN" Then
+                        filterDomain = reader.GetValue(2).ToString
+                    ElseIf reader.GetValue(1).ToString = "GROUP" Then
+                        filterGroup = reader(2).ToString
+                    End If
                 Loop
             End If
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
         Catch ex As Exception
             WriteLog("OTHER CONFIGURATION: Error fetching configuration. " & ex.Message)
-            cmd.Parameters.Clear()
+        Finally
             conn.Close()
             conn.Dispose()
         End Try
@@ -749,12 +744,11 @@ Public Class RedSkyMain
             cmd.Parameters.AddWithValue("@NextReportGeneration", nextGeneration)
             cmd.Parameters.AddWithValue("@ReportType", reportType)
             cmd.ExecuteNonQuery()
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
             WriteLog(reportType.ToString.ToUpper & " REPORT: Successfully updated report configuration. ")
         Catch ex As Exception
             WriteLog(reportType.ToString.ToUpper & " REPORT: Error updating Report Configuration. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
             conn.Close()
             conn.Dispose()
         End Try
