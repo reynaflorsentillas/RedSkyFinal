@@ -163,7 +163,7 @@ Public Class RedSky
             cmd.Connection = conn
             cmd.CommandText = "INSERT INTO AgentLogin(Domain, Group, Username, Workstation, LoginDate, LoginTime, isLogin, DateAdded) VALUES (@Domain, @Group, @Username, @Workstation, @LoginDate, @LoginTime, 1, @DateAdded)"
             cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("#Group", group)
+            cmd.Parameters.AddWithValue("@Group", group)
             cmd.Parameters.AddWithValue("@Username", username)
             cmd.Parameters.AddWithValue("@Workstation", machinename)
             cmd.Parameters.AddWithValue("@LoginDate", agentlogin.Date)
@@ -331,7 +331,7 @@ Public Class RedSky
 
         GetOtherConfiguration()
 
-        EventLog1.WriteEntry(currentDomain & " " & currentGroup & " " & currentUser & " " & currentMachine, EventLogEntryType.Information, eventId)
+        EventLog1.WriteEntry("USER CURRENT DOMAIN: " & currentDomain & vbNewLine & "USER CURRENT GROUP: " & currentGroup & vbNewLine & "USER NAME: " & currentUser & vbNewLine & "USER CURRENT MACHINE: " & currentMachine & vbNewLine & vbNewLine & "FILTER DOMAIN: " & filterDomain & vbNewLine & "FILTER GROUP: " & filterGroup, EventLogEntryType.Information, eventId)
         eventId += 1
 
         'Dim currentSessionId As Integer = WTSGetActiveConsoleSessionId()

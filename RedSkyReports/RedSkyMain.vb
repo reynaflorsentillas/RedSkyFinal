@@ -682,6 +682,7 @@ Public Class RedSkyMain
         GetMailingConfiguration()
         GetOtherConfiguration()
         SetRunStatus("STOP")
+        MsgBox("Successfully loaded updated configuration. ", MsgBoxStyle.Information, "Reload Configuration")
     End Sub
 
     Private Sub btnStopReports_Click(sender As Object, e As EventArgs) Handles btnStopReports.Click
