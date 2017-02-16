@@ -71,8 +71,6 @@ Public Class RedSky
 
         Init()
 
-
-
         'timer.Interval = 60000 ' 1 minute
         'AddHandler timer.Elapsed, AddressOf Me.OnTimer
         'timer.Start()
@@ -112,9 +110,9 @@ Public Class RedSky
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND isLogin = 1"
+            cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND Username = @Username AND isLogin = 1"
             cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("@Group", group)
+            cmd.Parameters.AddWithValue("@DomainGroup", group)
             cmd.Parameters.AddWithValue("@Username", username)
             reader = cmd.ExecuteReader
             If reader.HasRows Then
@@ -136,11 +134,11 @@ Public Class RedSky
                 conn.ConnectionString = connectionString
                 conn.Open()
                 cmd.Connection = conn
-                cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, DateModified = @DateModified WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND isLogin = 1"
+                cmd.CommandText = "UPDATE AgentLogin SET ForceLogOff = 1, Remarks = @Remarks, DateModified = @DateModified WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND Username = @Username AND isLogin = 1"
                 cmd.Parameters.AddWithValue("@Remarks", remarks)
                 cmd.Parameters.AddWithValue("@DateModified", DateTime.UtcNow.AddHours(8))
                 cmd.Parameters.AddWithValue("@Domain", domain)
-                cmd.Parameters.AddWithValue("@Group", group)
+                cmd.Parameters.AddWithValue("@DomainGroup", group)
                 cmd.Parameters.AddWithValue("@Username", username)
                 cmd.ExecuteNonQuery()
                 EventLog1.WriteEntry(remarks, EventLogEntryType.Information, eventId)
@@ -161,9 +159,9 @@ Public Class RedSky
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "INSERT INTO AgentLogin(Domain, Group, Username, Workstation, LoginDate, LoginTime, isLogin, DateAdded) VALUES (@Domain, @Group, @Username, @Workstation, @LoginDate, @LoginTime, 1, @DateAdded)"
+            cmd.CommandText = "INSERT INTO AgentLogin(Domain, DomainGroup, Username, Workstation, LoginDate, LoginTime, isLogin, DateAdded) VALUES (@Domain, @DomainGroup, @Username, @Workstation, @LoginDate, @LoginTime, 1, @DateAdded)"
             cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("@Group", group)
+            cmd.Parameters.AddWithValue("@DomainGroup", group)
             cmd.Parameters.AddWithValue("@Username", username)
             cmd.Parameters.AddWithValue("@Workstation", machinename)
             cmd.Parameters.AddWithValue("@LoginDate", agentlogin.Date)
@@ -184,22 +182,33 @@ Public Class RedSky
 
     Private Sub AgentLogout()
         Dim agentlogout As DateTime = DateTime.UtcNow.AddHours(8)
-        Me.AgentLogoutDBUpdate(currentDomain, currentGroup, currentUser, currentMachine, agentlogout)
+
+        'Dim currentDateTime As DateTime = DateTime.UtcNow.AddHours(8)
+
+        Dim span As New TimeSpan
+        span = agentlogout.Subtract(currentAgentLogin)
+        currentLoginDuration = span.TotalSeconds
+
+        Dim loginDurationSpan As TimeSpan = TimeSpan.FromSeconds(currentLoginDuration)
+        Dim loginDuration As String = loginDurationSpan.ToString("hh\:mm\:ss")
+
+        Me.AgentLogoutDBUpdate(currentDomain, currentGroup, currentUser, currentMachine, agentlogout, loginDuration)
     End Sub
 
-    Private Sub AgentLogoutDBUpdate(domain As String, group As String, username As String, machinename As String, agentlogout As DateTime)
+    Private Sub AgentLogoutDBUpdate(domain As String, group As String, username As String, machinename As String, agentlogout As DateTime, loginDuration As String)
         Try
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "UPDATE AgentLogin SET LogoutDate = @LogoutDate, LogoutTime = @LogoutTime, isLogin = 0,  DateModified = @DateModified WHERE Domain = @Domain AND Group = @Group AND Username = @LogoutUsername AND Workstation = @LogoutWorkstation AND isLogin = 1"
+            cmd.CommandText = "UPDATE AgentLogin SET LogoutDate = @LogoutDate, LogoutTime = @LogoutTime, LoginDuration = @LoginDuration, isLogin = 0, DateModified = @DateModified WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND Username = @LogoutUsername AND Workstation = @LogoutWorkstation AND isLogin = 1"
             cmd.Parameters.AddWithValue("@LogoutDate", agentlogout.Date)
             cmd.Parameters.AddWithValue("@LogoutTime", agentlogout)
             cmd.Parameters.AddWithValue("@DateModified", agentlogout)
             cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("@Group", group)
+            cmd.Parameters.AddWithValue("@DomainGroup", group)
             cmd.Parameters.AddWithValue("@LogoutUsername", username)
             cmd.Parameters.AddWithValue("@LogoutWorkstation", machinename)
+            cmd.Parameters.AddWithValue("@LoginDuration", loginDuration)
             cmd.ExecuteNonQuery()
             EventLog1.WriteEntry(username + " logged out in " + machinename + ". " + agentlogout, EventLogEntryType.Information, eventId)
             eventId += 1
@@ -215,45 +224,36 @@ Public Class RedSky
 
     Private Sub OnTimer(sender As Object, e As Timers.ElapsedEventArgs)
         ' TODO: Insert monitoring activities here.
-        Dim currentDateTime As DateTime = DateTime.UtcNow.AddHours(8)
-
-        Dim span As New TimeSpan
-        span = currentDateTime.Subtract(currentAgentLogin)
-        currentLoginDuration = span.TotalSeconds
-
-        Dim loginDurationSpan As TimeSpan = TimeSpan.FromSeconds(currentLoginDuration)
-        Dim loginDuration As String = loginDurationSpan.ToString("hh\:mm\:ss")
         'EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information)
-
         'EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information)
         'Me.AgentLoginDBUpdate(currentDomain, currentUser, currentDomain, loginDuration, currentDateTime)
         Me.CheckForceLogOff(currentDomain, currentGroup, currentUser, currentMachine)
     End Sub
 
-    Private Sub AgentLoginDBUpdate(domain As String, group As String, username As String, machinename As String, loginDuration As String, currentDateTime As DateTime)
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "UPDATE AgentLogin SET LoginDuration = @LoginDuration, DateModified = @LoginDurationDateModified WHERE Domain = @Domain AND Group = @Group AND Username = @LoginDurationUsername AND Workstation = @LoginDurationWorkstation AND isLogin = 1"
-            cmd.Parameters.AddWithValue("@LoginDuration", loginDuration)
-            cmd.Parameters.AddWithValue("@LoginDurationDateModified", currentDateTime)
-            cmd.Parameters.AddWithValue("@Domain", domain)
-            cmd.Parameters.AddWithValue("@Group", group)
-            cmd.Parameters.AddWithValue("@LoginDurationUsername", username)
-            cmd.Parameters.AddWithValue("@LoginDurationWorkstation", machinename)
-            cmd.ExecuteNonQuery()
-            EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information, eventId)
-            eventId += 1
-        Catch ex As Exception
-            EventLog1.WriteEntry("Error while updating record on table. " + ex.Message, EventLogEntryType.Error, eventId)
-            eventId += 1
-        Finally
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
-    End Sub
+    'Private Sub AgentLoginDBUpdate(domain As String, group As String, username As String, machinename As String, loginDuration As String, currentDateTime As DateTime)
+    '    Try
+    '        conn.ConnectionString = connectionString
+    '        conn.Open()
+    '        cmd.Connection = conn
+    '        cmd.CommandText = "UPDATE AgentLogin SET LoginDuration = @LoginDuration, DateModified = @LoginDurationDateModified WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND Username = @LoginDurationUsername AND Workstation = @LoginDurationWorkstation AND isLogin = 1"
+    '        cmd.Parameters.AddWithValue("@LoginDuration", loginDuration)
+    '        cmd.Parameters.AddWithValue("@LoginDurationDateModified", currentDateTime)
+    '        cmd.Parameters.AddWithValue("@Domain", domain)
+    '        cmd.Parameters.AddWithValue("@DomainGroup", group)
+    '        cmd.Parameters.AddWithValue("@LoginDurationUsername", username)
+    '        cmd.Parameters.AddWithValue("@LoginDurationWorkstation", machinename)
+    '        cmd.ExecuteNonQuery()
+    '        EventLog1.WriteEntry("Monitoring the System. Current Agent Login: " + currentAgentLogin + " Current Date Time: " + currentDateTime + " Login Duration: " + loginDuration, EventLogEntryType.Information, eventId)
+    '        eventId += 1
+    '    Catch ex As Exception
+    '        EventLog1.WriteEntry("Error while updating record on table. " + ex.Message, EventLogEntryType.Error, eventId)
+    '        eventId += 1
+    '    Finally
+    '        cmd.Parameters.Clear()
+    '        conn.Close()
+    '        conn.Dispose()
+    '    End Try
+    'End Sub
 
     Private Sub CheckForceLogOff(domain As String, group As String, username As String, machinename As String)
         If domain.ToLower = filterDomain.ToLower And group.ToLower = filterGroup.ToLower Then
@@ -262,9 +262,9 @@ Public Class RedSky
                 conn.ConnectionString = connectionString
                 conn.Open()
                 cmd.Connection = conn
-                cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND Group = @Group AND Username = @Username AND Workstation = @Workstation AND isLogin = 1 AND ForceLogOff = 1"
+                cmd.CommandText = "SELECT * FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND Username = @Username AND Workstation = @Workstation AND isLogin = 1 AND ForceLogOff = 1"
                 cmd.Parameters.AddWithValue("@Domain", domain)
-                cmd.Parameters.AddWithValue("@Group", group)
+                cmd.Parameters.AddWithValue("@DomainGroup", group)
                 cmd.Parameters.AddWithValue("@Username", username)
                 cmd.Parameters.AddWithValue("@Workstation", machinename)
                 reader = cmd.ExecuteReader
@@ -327,6 +327,7 @@ Public Class RedSky
             Next
         Catch ex As Exception
             EventLog1.WriteEntry("Error while fetching group of user: " + currentUser + ". " + ex.Message, EventLogEntryType.Error, eventId)
+            eventId += 1
         End Try
 
         GetOtherConfiguration()

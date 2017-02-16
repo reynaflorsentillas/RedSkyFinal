@@ -39,8 +39,10 @@ Public Class RedSkyConfiguration
             Dim reportType As String
             If reader.HasRows Then
                 initialConfig = False
+                Dim overwriteExisting As String = ""
                 Do While reader.Read
                     reportType = reader.GetValue(1).ToString
+                    overwriteExisting = reader.GetValue(10).ToString
 
                     If reportType = "Daily" Then
                         dtDaily.Value = reader.GetDateTime(2)
@@ -49,6 +51,9 @@ Public Class RedSkyConfiguration
                         cboDailyStatus.SelectedItem = reader.GetValue(5).ToString
                         dtDailyFrom.Value = reader.GetDateTime(6)
                         dtDailyTo.Value = reader.GetDateTime(7)
+                        If Not reader.GetValue(9).ToString = "" Then
+                            chkUseTemplateDaily.Checked = Convert.ToBoolean(reader.GetValue(9).ToString)
+                        End If
                     End If
 
                     If reportType = "Weekly" Then
@@ -57,6 +62,9 @@ Public Class RedSkyConfiguration
                         lblWeeklyNextReport.Text = "Next Report: " & reader.GetValue(4).ToString
                         cboWeeklyStatus.SelectedItem = reader.GetValue(5).ToString
                         cboWeeklyDay.SelectedItem = reader.GetValue(8).ToString
+                        If Not reader.GetValue(9).ToString = "" Then
+                            chkUseTemplateWeekly.Checked = Convert.ToBoolean(reader.GetValue(9).ToString)
+                        End If
                     End If
 
                     If reportType = "Monthly" Then
@@ -64,8 +72,14 @@ Public Class RedSkyConfiguration
                         lblMonthlyLastReport.Text = "Last Report: " & reader.GetValue(3).ToString
                         lblMonthyNextReport.Text = "Next Report: " & reader.GetValue(4).ToString
                         cboMonthlyStatus.SelectedItem = reader.GetValue(5).ToString
+                        If Not reader.GetValue(9).ToString = "" Then
+                            chkUseTemplateMonthly.Checked = Convert.ToBoolean(reader.GetValue(9).ToString)
+                        End If
                     End If
                 Loop
+                If Not overwriteExisting = "" Then
+                    chkOverwiteExistingFiles.Checked = Convert.ToBoolean(overwriteExisting)
+                End If
             Else
                 initialConfig = True
                 cboDailyStatus.SelectedItem = "ENABLED"
@@ -87,6 +101,12 @@ Public Class RedSkyConfiguration
         Dim dailyFrom As DateTime
         Dim dailyTo As DateTime
         Dim weeklyDay As String = ""
+        Dim useTemplate As Boolean = False
+        Dim overWriteExisting As Boolean = False
+
+        If chkOverwiteExistingFiles.Checked Then
+            overWriteExisting = True
+        End If
 
         Try
             For i = 0 To 2 Step 1
@@ -98,6 +118,9 @@ Public Class RedSkyConfiguration
                     dailyFrom = dtDailyFrom.Value
                     dailyTo = dtDailyTo.Value
                     weeklyDay = ""
+                    If chkUseTemplateDaily.Checked Then
+                        useTemplate = True
+                    End If
                 ElseIf i = 1 Then
                     reportType = "Weekly"
                     generationDateTime = dtWeekly.Value
@@ -105,6 +128,9 @@ Public Class RedSkyConfiguration
                     'dailyFrom = Nothing
                     'dailyTo = Nothing
                     weeklyDay = cboWeeklyDay.SelectedItem.ToString
+                    If chkUseTemplateWeekly.Checked Then
+                        useTemplate = True
+                    End If
                 ElseIf i = 2 Then
                     reportType = "Monthly"
                     generationDateTime = dtMonthly.Value
@@ -112,14 +138,17 @@ Public Class RedSkyConfiguration
                     'dailyFrom = Nothing
                     'dailyTo = Nothing
                     weeklyDay = ""
+                    If chkUseTemplateMonthly.Checked Then
+                        useTemplate = True
+                    End If
                 End If
 
                 If Not reportType = "" Then
                     If initialConfig = True Then
-                        NewReportConfiguration(reportType, generationDateTime, status, dailyFrom, dailyTo, weeklyDay)
+                        NewReportConfiguration(reportType, generationDateTime, status, dailyFrom, dailyTo, weeklyDay, Convert.ToString(useTemplate), Convert.ToString(overWriteExisting))
                         'NewOtherConfiguration()
                     Else
-                        UpdateReportConfiguration(reportType, generationDateTime, status, dailyFrom, dailyTo, weeklyDay)
+                        UpdateReportConfiguration(reportType, generationDateTime, status, dailyFrom, dailyTo, weeklyDay, Convert.ToString(useTemplate), Convert.ToString(overWriteExisting))
                         'UpdateOtherConfiguration()
                     End If
                 End If
@@ -130,18 +159,20 @@ Public Class RedSkyConfiguration
         End Try
     End Sub
 
-    Private Sub NewReportConfiguration(reportType As String, generationDateTime As DateTime, status As String, dailyFrom As DateTime, dailyTo As DateTime, weeklyDay As String)
+    Private Sub NewReportConfiguration(reportType As String, generationDateTime As DateTime, status As String, dailyFrom As DateTime, dailyTo As DateTime, weeklyDay As String, useTemplate As String, overwriteExisting As String)
         Try
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "INSERT INTO ReportConfiguration(ReportType, GenerationDateTime, Status, DailyFrom, DailyTo, WeeklyDay) VALUES (@ReportType, @GenerationDateTime, @Status)"
+            cmd.CommandText = "INSERT INTO ReportConfiguration(ReportType, GenerationDateTime, Status, DailyFrom, DailyTo, WeeklyDay, UseTemplate, OverwriteExistingFiles) VALUES (@ReportType, @GenerationDateTime, @Status, @DailyFrom, @DailyTo, @WeeklyDay, @UseTemplate, @OverwriteExistingFiles)"
             cmd.Parameters.AddWithValue("@ReportType", reportType)
             cmd.Parameters.AddWithValue("@GenerationDateTime", generationDateTime)
             cmd.Parameters.AddWithValue("@Status", status)
             cmd.Parameters.AddWithValue("@DailyFrom", dailyFrom)
             cmd.Parameters.AddWithValue("@DailyTo", dailyTo)
             cmd.Parameters.AddWithValue("@WeeklyDay", weeklyDay)
+            cmd.Parameters.AddWithValue("@UseTemplate", useTemplate)
+            cmd.Parameters.AddWithValue("@OverwriteExistingFiles", overwriteExisting)
             cmd.ExecuteNonQuery()
         Catch ex As Exception
             MsgBox("Error inserting record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")
@@ -152,18 +183,20 @@ Public Class RedSkyConfiguration
         End Try
     End Sub
 
-    Private Sub UpdateReportConfiguration(reportType As String, generationDateTime As DateTime, status As String, dailyFrom As DateTime, dailyTo As DateTime, weeklyDay As String)
+    Private Sub UpdateReportConfiguration(reportType As String, generationDateTime As DateTime, status As String, dailyFrom As DateTime, dailyTo As DateTime, weeklyDay As String, useTemplate As String, overwriteExisting As String)
         Try
             conn.ConnectionString = connectionString
             conn.Open()
             cmd.Connection = conn
-            cmd.CommandText = "UPDATE ReportConfiguration SET GenerationDateTime = @GenerationDateTime, Status = @Status, DailyFrom = @DailyFrom, DailyTo = @DailyTo, WeeklyDay = @WeeklyDay WHERE ReportType = @ReportType"
+            cmd.CommandText = "UPDATE ReportConfiguration SET GenerationDateTime = @GenerationDateTime, Status = @Status, DailyFrom = @DailyFrom, DailyTo = @DailyTo, WeeklyDay = @WeeklyDay, UseTemplate = @UseTemplate, OverwriteExistingFiles = @OverwriteExistingFiles WHERE ReportType = @ReportType"
             cmd.Parameters.AddWithValue("@GenerationDateTime", generationDateTime)
             cmd.Parameters.AddWithValue("@Status", status)
             cmd.Parameters.AddWithValue("@ReportType", reportType)
             cmd.Parameters.AddWithValue("@DailyFrom", dailyFrom)
             cmd.Parameters.AddWithValue("@DailyTo", dailyTo)
             cmd.Parameters.AddWithValue("@WeeklyDay", weeklyDay)
+            cmd.Parameters.AddWithValue("@UseTemplate", useTemplate)
+            cmd.Parameters.AddWithValue("@OverwriteExistingFiles", overwriteExisting)
             cmd.ExecuteNonQuery()
         Catch ex As Exception
             MsgBox("Error updating record to table. " & ex.Message, MsgBoxStyle.Exclamation, "Database Error")

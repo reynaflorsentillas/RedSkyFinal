@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_5EF119199339BC85988EF046DAFE165C"
+        "MsmKey" = "8:_ABB9562E7CAA7D97DD12959EDE7D4D64"
         "OwnerKey" = "8:_D896F11BD86E4DCDB683688C358E2826"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_ED64FB391FC6A38AA653B3AA77A615F4"
+        "OwnerKey" = "8:_D896F11BD86E4DCDB683688C358E2826"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_D896F11BD86E4DCDB683688C358E2826"
         "MsmSig" = "8:_UNDEFINED"
@@ -34,7 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_5EF119199339BC85988EF046DAFE165C"
+        "OwnerKey" = "8:_ABB9562E7CAA7D97DD12959EDE7D4D64"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_ED64FB391FC6A38AA653B3AA77A615F4"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -62,6 +74,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
         "Release"
@@ -180,14 +200,45 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5EF119199339BC85988EF046DAFE165C"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_ABB9562E7CAA7D97DD12959EDE7D4D64"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_ABB9562E7CAA7D97DD12959EDE7D4D64"
+                    {
+                    "Name" = "8:System.Management.Automation.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Management.Automation.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_571C45B3B0FF473C8677272EC91A3DAB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_ED64FB391FC6A38AA653B3AA77A615F4"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
                 "ScatterAssemblies"
                 {
-                    "_5EF119199339BC85988EF046DAFE165C"
+                    "_ED64FB391FC6A38AA653B3AA77A615F4"
                     {
                     "Name" = "8:System.Net.Http.dll"
                     "Attributes" = "3:512"
@@ -268,7 +319,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RedSky Agent Monitoring"
         "ProductCode" = "8:{C14501E9-8BFA-4B29-8B25-C68D24F521D1}"
-        "PackageCode" = "8:{861DB26F-7D36-4E4B-9E68-867FF49EBBDE}"
+        "PackageCode" = "8:{ECF9B7A4-00E9-4671-B6B1-277C0D3EEC70}"
         "UpgradeCode" = "8:{195DE8E5-AB71-40B7-9645-84AC5DDE2F20}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
