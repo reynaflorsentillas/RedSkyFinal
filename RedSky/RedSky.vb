@@ -183,8 +183,6 @@ Public Class RedSky
     Private Sub AgentLogout()
         Dim agentlogout As DateTime = DateTime.UtcNow.AddHours(8)
 
-        'Dim currentDateTime As DateTime = DateTime.UtcNow.AddHours(8)
-
         Dim span As New TimeSpan
         span = agentlogout.Subtract(currentAgentLogin)
         currentLoginDuration = span.TotalSeconds
