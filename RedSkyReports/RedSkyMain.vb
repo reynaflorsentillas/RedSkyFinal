@@ -22,30 +22,43 @@ Public Class RedSkyMain
     Dim mailingList As New Dictionary(Of String, String)
 
     'Dim reportsLocation As String
+    Dim overWriteExisting As Boolean
 
     'Dim dailyStatus As String
     Dim dailyGeneration As DateTime
     Dim dailyFrom As DateTime
     Dim dailyTo As DateTime
     Dim dailyLastGeneration As DateTime
+    Dim dailyUseTemplate As Boolean
 
     'Dim weeklyStatus As String
     Dim weeklyGeneration As DateTime
     Dim weeklyGenerationDay As String
     Dim weeklyLastGeneration As DateTime
+    Dim weeklyUseTempalte As Boolean
 
     'Dim monthlyStatus As String
     Dim monthlyGeneration As DateTime
     Dim monthlyLastGeneration As DateTime
+    Dim monthlyUseTemplate As Boolean
 
     Dim today As DateTime
 
-    Dim filterDomain As String = ""
-    Dim filterGroup As String = ""
+    Dim filterDomain As String
+    Dim filterGroup As String
+    Dim currentMachine As String
 
-    Dim currentMachine As String = System.Net.Dns.GetHostName.ToString
+    Dim referenceCode As String
+    Dim lastReportReferenceNumber As Integer
+    Dim referenceNumber As Integer
 
     Private Sub RedSkyMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Reload()
+    End Sub
+
+    Private Sub Reload()
+        currentMachine = System.Net.Dns.GetHostName.ToString
+        mailingList.Clear()
         GetReportConfiguration()
         GetMailingConfiguration()
         GetOtherConfiguration()
@@ -69,6 +82,7 @@ Public Class RedSkyMain
             If reader.HasRows Then
                 Do While reader.Read
                     reportType = reader.GetValue(1).ToString
+                    overWriteExisting = If(reader.IsDBNull(10), False, Convert.ToBoolean(reader.GetValue(10)))
 
                     If reportType = "Daily" Then
                         lblDailyStatus.Text = reader.GetValue(5).ToString
@@ -77,6 +91,7 @@ Public Class RedSkyMain
                         dailyFrom = reader.GetValue(6)
                         dailyTo = reader.GetValue(7)
                         dailyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
+                        dailyUseTemplate = If(reader.IsDBNull(9), False, Convert.ToBoolean(reader.GetValue(9)))
                     End If
 
                     If reportType = "Weekly" Then
@@ -85,6 +100,7 @@ Public Class RedSkyMain
                         weeklyGenerationDay = reader.GetValue(8).ToString
                         lblWeeklyStatus.Text = reader.GetValue(5).ToString
                         weeklyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
+                        weeklyUseTempalte = If(reader.IsDBNull(9), False, Convert.ToBoolean(reader.GetValue(9)))
                     End If
 
                     If reportType = "Monthly" Then
@@ -92,6 +108,7 @@ Public Class RedSkyMain
                         ' monthlyStatus = reader.GetValue(5).ToString
                         lblMonthlyStatus.Text = reader.GetValue(5).ToString
                         monthlyLastGeneration = If(reader.IsDBNull(4), Nothing, reader.GetDateTime(4))
+                        monthlyUseTemplate = If(reader.IsDBNull(9), False, Convert.ToBoolean(reader.GetValue(9)))
                     End If
                 Loop
             End If
@@ -152,10 +169,12 @@ Public Class RedSkyMain
     Private Sub OnTimer(sender As Object, e As Timers.ElapsedEventArgs)
 
         today = DateTime.UtcNow.AddHours(8)
+        referenceCode = "REDSKY - " & today.Year & " - "
 
         'DAILY REPORT
         If lblDailyStatus.Text = "ENABLED" Then
             If today.ToShortTimeString = dailyGeneration.ToShortTimeString Then
+                GetReportHistory("Daily")
                 GenerateDaily()
             End If
         End If
@@ -164,6 +183,7 @@ Public Class RedSkyMain
         If lblWeeklyStatus.Text = "ENABLED" Then
             If today.DayOfWeek.ToString.ToUpper = weeklyGenerationDay Then
                 If today.ToShortTimeString = weeklyGeneration.ToShortTimeString Then
+                    GetReportHistory("Weekly")
                     GenerateWeekly()
                 End If
             End If
@@ -176,6 +196,7 @@ Public Class RedSkyMain
         If lblMonthlyStatus.Text = "ENABLED" Then
             If today.ToShortDateString = lastDayInMonth.ToShortDateString Then
                 If today.ToShortTimeString = monthlyGeneration.ToShortTimeString Then
+                    GetReportHistory("Monthly")
                     GenerateMonthly(lastDayInMonth)
                 End If
             End If
@@ -195,89 +216,146 @@ Public Class RedSkyMain
 
         Dim generated As Boolean = False
         Dim filePath As String = Application.StartupPath & "\Reports\Daily\"
-        Dim fileName As String = ""
+        Dim fileName As String = "CSI RedSky Daily Summary " & today.ToString("ddMMyyyy") & ".xlsx"
         Dim seats As Integer = 0
 
         If Not Directory.Exists(filePath) Then
             Directory.CreateDirectory(filePath)
         End If
 
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
-            cmd.CommandText = "SELECT LoginDate, LoginTime, COUNT(Username), Username, Workstation FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginTime BETWEEN @dateFrom AND @dateTo GROUP	BY LoginDate, LoginTime, Username, Workstation"
-            cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
-            cmd.Parameters.AddWithValue("@dateTo", dateTo)
-            cmd.Parameters.AddWithValue("@Domain", filterDomain)
-            cmd.Parameters.AddWithValue("@DomainGroup", filterGroup)
-            reader = cmd.ExecuteReader
-            If reader.HasRows Then
-                'MsgBox("Has Data!")
-                Try
-                    Dim xlApp As New Excel.Application
-                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
-                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
-                    xlWorksheet.Name = "Agent Logins"
-                    Dim xlRange As Excel.Range
-                    xlRange = xlWorksheet.Range("A5", "E5")
-                    xlRange.ColumnWidth = 30
-                    xlRange.Interior.Color = Color.LightBlue
-                    xlRange.Font.Bold = True
+        'fileName = "CSI RedSky Daily Summary " & today.ToString("ddMMyyyy") & ".xlsx"
+        Dim templateFilePath As String = Application.StartupPath & "\Templates\"
+        Dim templateFileName As String = "daily_template.xlsx"
 
-                    xlWorksheet.Range("D2").Value = "PERIOD: " & dateFrom.ToString & " - " & dateTo.ToString
+        referenceNumber = lastReportReferenceNumber + 1
 
-                    xlWorksheet.Range("A5").Value = "LOGIN DATE"
-                    xlWorksheet.Range("B5").Value = "LOGIN TIME"
-                    xlWorksheet.Range("C5").Value = "SEATS USED"
-                    xlWorksheet.Range("D5").Value = "USERNAME"
-                    xlWorksheet.Range("E5").Value = "WORDKSTATION"
+        If overWriteExisting = True Then
+            If File.Exists(filePath & fileName) Then
+                File.Delete(filePath & fileName)
+            End If
+            Try
+                conn.ConnectionString = connectionString
+                conn.Open()
+                cmd.Connection = conn
+                cmd.CommandText = "SELECT LoginDate, LoginTime, COUNT(Username), Username, Workstation FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginTime BETWEEN @dateFrom AND @dateTo GROUP	BY LoginDate, LoginTime, Username, Workstation"
+                cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
+                cmd.Parameters.AddWithValue("@dateTo", dateTo)
+                cmd.Parameters.AddWithValue("@Domain", filterDomain)
+                cmd.Parameters.AddWithValue("@DomainGroup", filterGroup)
+                reader = cmd.ExecuteReader
+                If reader.HasRows Then
+                    'MsgBox("Has Data!")
+                    If dailyUseTemplate = True Then
+                        Try
+                            File.Copy(templateFilePath & templateFileName, filePath & fileName)
+                            Dim xlApp As New Excel.Application
+                            Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Open(filePath & fileName)
+                            Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                            Dim xlRange As Excel.Range = xlWorksheet.Range("A1", "G1")
+                            xlRange.Range("F1").Value = "PERIOD: " & dateFrom.ToString & " - " & dateTo.ToString
+                            xlRange.Range("E5").Value = MonthName(today.Month, True)
+                            xlRange.Range("F5").Value = referenceNumber
+                            xlRange.Range("C5").Value = "REFERENCE # : " & referenceCode
 
-                    Dim rowCount As Integer = 6
+                            Dim rowCount As Integer = 9
+                            Dim recordId As Integer = 0
+                            Do While reader.Read
+                                recordId += 1
+                                If rowCount > 9 Then
+                                    xlWorksheet.Range("A" & rowCount).EntireRow.Insert()
+                                End If
+                                xlWorksheet.Cells(rowCount, 1) = recordId
+                                xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0))
+                                xlWorksheet.Cells(rowCount, 3) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1))
+                                xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(2), Nothing, reader.GetValue(2))
+                                xlWorksheet.Cells(rowCount, 5) = If(reader.IsDBNull(3), Nothing, reader.GetValue(3))
+                                xlWorksheet.Cells(rowCount, 6) = If(reader.IsDBNull(4), Nothing, reader.GetValue(4))
+                                rowCount += 1
+                                seats += 1
+                            Loop
 
-                    Do While reader.Read
-                        xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0))
-                        xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1))
-                        xlWorksheet.Cells(rowCount, 3) = If(reader.IsDBNull(2), Nothing, reader.GetValue(2))
-                        xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(3), Nothing, reader.GetValue(3))
-                        xlWorksheet.Cells(rowCount, 5) = If(reader.IsDBNull(4), Nothing, reader.GetValue(4))
-                        rowCount += 1
-                        seats += 1
-                    Loop
+                            xlRange.Range("F2").Value = "TOTAL SEATS USED: " & seats.ToString
+                            'xlWorksheet.SaveAs(filePath & fileName)
+                            xlWorkbook.Save()
+                            xlWorkbook.Close()
+                            xlApp.Quit()
 
-                    xlWorksheet.Range("D3").Value = "TOTAL SEATS USED: " & seats.ToString
 
-                    fileName = "CSI RedSky Daily Summary " & today.ToString("ddMMyyyy") & ".xlsx"
+                            xlApp = Nothing
+                            xlWorkbook = Nothing
+                            xlWorksheet = Nothing
 
-                    If File.Exists(filePath & fileName) Then
-                        File.Delete(filePath & fileName)
+                            generated = True
+
+                            WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
+                        Catch ex As Exception
+                            WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+                        End Try
+                    Else
+                        Try
+                            Dim xlApp As New Excel.Application
+                            Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                            Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                            xlWorksheet.Name = "Agent Logins"
+                            Dim xlRange As Excel.Range
+                            xlRange = xlWorksheet.Range("A5", "E5")
+                            xlRange.ColumnWidth = 30
+                            xlRange.Interior.Color = Color.LightBlue
+                            xlRange.Font.Bold = True
+
+                            xlWorksheet.Range("D2").Value = "PERIOD: " & dateFrom.ToString & " - " & dateTo.ToString
+
+                            xlWorksheet.Range("A5").Value = "LOGIN DATE"
+                            xlWorksheet.Range("B5").Value = "LOGIN TIME"
+                            xlWorksheet.Range("C5").Value = "SEATS USED"
+                            xlWorksheet.Range("D5").Value = "USERNAME"
+                            xlWorksheet.Range("E5").Value = "WORDKSTATION"
+
+                            Dim rowCount As Integer = 6
+
+                            Do While reader.Read
+                                xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0))
+                                xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1))
+                                xlWorksheet.Cells(rowCount, 3) = If(reader.IsDBNull(2), Nothing, reader.GetValue(2))
+                                xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(3), Nothing, reader.GetValue(3))
+                                xlWorksheet.Cells(rowCount, 5) = If(reader.IsDBNull(4), Nothing, reader.GetValue(4))
+                                rowCount += 1
+                                seats += 1
+                            Loop
+
+                            xlWorksheet.Range("D3").Value = "TOTAL SEATS USED: " & seats.ToString
+
+                            xlWorksheet.SaveAs(filePath & fileName)
+
+                            xlWorkbook.Close()
+                            xlApp.Quit()
+
+                            xlApp = Nothing
+                            xlWorkbook = Nothing
+                            xlWorksheet = Nothing
+
+                            generated = True
+
+                            WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
+                        Catch ex As Exception
+                            WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+                        End Try
                     End If
 
-                    xlWorksheet.SaveAs(filePath & fileName)
+                    'Else
+                    'MsgBox("No Data! " & dateFrom & " " & dateTo)
+                End If
+            Catch ex As Exception
+                WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+            Finally
+                cmd.Parameters.Clear()
+                conn.Close()
+                conn.Dispose()
+            End Try
 
-                    xlWorkbook.Close()
-                    xlApp.Quit()
-
-                    xlApp = Nothing
-                    xlWorkbook = Nothing
-                    xlWorksheet = Nothing
-
-                    generated = True
-
-                    WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
-                Catch ex As Exception
-                    WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
-                End Try
-                'Else
-                'MsgBox("No Data! " & dateFrom & " " & dateTo)
-            End If
-        Catch ex As Exception
-            WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
-        Finally
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
+        Else
+            WriteLog("DAILY REPORT: The system is configured to not generate existing files. To change settings go to configuration.")
+        End If
 
         If generated = True Then
             Dim subject As String
@@ -297,7 +375,8 @@ Public Class RedSkyMain
             If dailyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
                 dailyLastGeneration = dailyLastGeneration.AddDays(-1)
             End If
-            UpdateReportConiguration("Daily", dailyLastGeneration, nextGeneration)
+            UpdateReportConfiguration("Daily", dailyLastGeneration, nextGeneration)
+            ReportHistory("Daily", referenceCode, MonthName(today.Month, True), referenceNumber, today)
         End If
     End Sub
 
@@ -311,7 +390,7 @@ Public Class RedSkyMain
 
         Dim generated As Boolean = False
         Dim filePath As String = Application.StartupPath & "\Reports\Weekly\"
-        Dim fileName As String = ""
+        Dim fileName As String = "CSI RedSky Weekly Summary " & dateFrom.ToString("ddMMyyyy") & " - " & dateTo.ToString("ddMMyyyy") & ".xlsx"
         Dim seats As Integer = 0
 
         If Not Directory.Exists(filePath) Then
@@ -323,88 +402,141 @@ Public Class RedSkyMain
             nightShift = True
         End If
 
-        Try
-            conn.ConnectionString = connectionString
-            conn.Open()
-            cmd.Connection = conn
+        Dim templateFilePath As String = Application.StartupPath & "\Templates\"
+        Dim templateFileName As String = "weekly_template.xlsx"
 
-            If nightShift = True Then
-                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
-            Else
-                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
-                cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+        referenceNumber = lastReportReferenceNumber + 1
+
+        If overWriteExisting = True Then
+            If File.Exists(filePath & fileName) Then
+                File.Delete(filePath & fileName)
             End If
-            'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo"
-            cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
-            cmd.Parameters.AddWithValue("@dateTo", dateTo)
-            cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
-            cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
-            cmd.Parameters.AddWithValue("@Domain", filterDomain)
-            cmd.Parameters.AddWithValue("@DomainGroup", filterGroup)
-            reader = cmd.ExecuteReader
-            If reader.HasRows Then
-                'MsgBox("Has Data!" & dateFrom.ToString & " " & dateTo.ToString)
-                Try
-                    Dim xlApp As New Excel.Application
-                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
-                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
-                    xlWorksheet.Name = "Weekly Report"
-                    Dim xlRange As Excel.Range
-                    xlRange = xlWorksheet.Range("A2", "B2")
-                    xlRange.ColumnWidth = 30
-                    xlRange.Interior.Color = Color.LightBlue
-                    xlRange.Font.Bold = True
 
-                    xlWorksheet.Range("B1").Value = "PERIOD: " & dateFrom.ToShortDateString & " - " & dateTo.ToShortDateString
+            Try
+                conn.ConnectionString = connectionString
+                conn.Open()
+                cmd.Connection = conn
 
-                    xlWorksheet.Range("A2").Value = "DATE"
-                    xlWorksheet.Range("B2").Value = "NUMBER OF SEATS"
+                If nightShift = True Then
+                    'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo"
+                    cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom OR CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                Else
+                    'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo"
+                    cmd.CommandText = "SELECT LoginDate, COUNT(Username) AS Seats FROM AgentLogin WHERE Domain = @Domain AND DomainGroup = @DomainGroup AND LoginDate BETWEEN @dateFrom AND @dateTo AND CAST(LoginTime as time) >= @timeFrom AND CAST(LoginTime as time) <= @timeTo GROUP BY LoginDate"
+                End If
+                'cmd.CommandText = "SELECT * FROM AgentLogin WHERE LoginTime BETWEEN @dateFrom AND @dateTo"
+                cmd.Parameters.AddWithValue("@dateFrom", dateFrom)
+                cmd.Parameters.AddWithValue("@dateTo", dateTo)
+                cmd.Parameters.AddWithValue("@timeFrom", dailyFrom.ToLongTimeString)
+                cmd.Parameters.AddWithValue("@timeTo", dailyTo.ToLongTimeString)
+                cmd.Parameters.AddWithValue("@Domain", filterDomain)
+                cmd.Parameters.AddWithValue("@DomainGroup", filterGroup)
+                reader = cmd.ExecuteReader
+                If reader.HasRows Then
+                    'MsgBox("Has Data!" & dateFrom.ToString & " " & dateTo.ToString)
+                    If dailyUseTemplate = True Then
+                        Try
+                            File.Copy(templateFilePath & templateFileName, filePath & fileName)
+                            Dim xlApp As New Excel.Application
+                            Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Open(filePath & fileName)
+                            Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                            Dim xlRange As Excel.Range = xlWorksheet.Range("A1", "G1")
+                            xlRange.Range("F1").Value = "PERIOD: " & dateFrom.ToShortDateString & " - " & dateTo.ToShortDateString
+                            xlRange.Range("E5").Value = MonthName(today.Month, True)
+                            xlRange.Range("F5").Value = referenceNumber
+                            xlRange.Range("C5").Value = "REFERENCE # : " & referenceCode
 
-                    Dim rowCount As Integer = 3
+                            Dim rowCount As Integer = 9
+                            Dim recordId As Integer = 0
+                            Do While reader.Read
+                                recordId += 1
+                                If rowCount > 9 Then
+                                    xlWorksheet.Range("A" & rowCount).EntireRow.Insert()
+                                End If
+                                xlWorksheet.Cells(rowCount, 1) = recordId
+                                xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
+                                xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
 
-                    Do While reader.Read
-                        xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
-                        xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
+                                rowCount += 1
+                                seats += reader.GetValue(1)
+                            Loop
 
-                        rowCount += 1
-                        seats += reader.GetValue(1)
-                    Loop
+                            xlRange.Range("F2").Value = "TOTAL SEATS USED: " & seats.ToString
+                            'xlWorksheet.SaveAs(filePath & fileName)
+                            xlWorkbook.Save()
+                            xlWorkbook.Close()
+                            xlApp.Quit()
 
-                    fileName = "CSI RedSky Weekly Summary " & dateFrom.ToString("ddMMyyyy") & " - " & dateTo.ToString("ddMMyyyy") & ".xlsx"
 
-                    If File.Exists(filePath & fileName) Then
-                        File.Delete(filePath & fileName)
+                            xlApp = Nothing
+                            xlWorkbook = Nothing
+                            xlWorksheet = Nothing
+
+                            generated = True
+
+                            WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
+                        Catch ex As Exception
+                            WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+                        End Try
+                    Else
+                        Try
+                            Dim xlApp As New Excel.Application
+                            Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                            Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                            xlWorksheet.Name = "Weekly Report"
+                            Dim xlRange As Excel.Range
+                            xlRange = xlWorksheet.Range("A2", "B2")
+                            xlRange.ColumnWidth = 30
+                            xlRange.Interior.Color = Color.LightBlue
+                            xlRange.Font.Bold = True
+
+                            xlWorksheet.Range("B1").Value = "PERIOD: " & dateFrom.ToShortDateString & " - " & dateTo.ToShortDateString
+
+                            xlWorksheet.Range("A2").Value = "DATE"
+                            xlWorksheet.Range("B2").Value = "NUMBER OF SEATS"
+
+                            Dim rowCount As Integer = 3
+
+                            Do While reader.Read
+                                xlWorksheet.Cells(rowCount, 1) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
+                                xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
+
+                                rowCount += 1
+                                seats += reader.GetValue(1)
+                            Loop
+
+                            xlWorksheet.SaveAs(filePath & fileName)
+
+                            xlWorkbook.Close()
+                            xlApp.Quit()
+
+                            xlApp = Nothing
+                            xlWorkbook = Nothing
+                            xlWorksheet = Nothing
+
+                            generated = True
+
+                            WriteLog("WEEKLY REPORT: Successfully generated report. " & fileName)
+
+                        Catch ex As Exception
+                            MsgBox(ex.Message)
+                            WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
+                        End Try
                     End If
 
-                    xlWorksheet.SaveAs(filePath & fileName)
-
-                    xlWorkbook.Close()
-                    xlApp.Quit()
-
-                    xlApp = Nothing
-                    xlWorkbook = Nothing
-                    xlWorksheet = Nothing
-
-                    generated = True
-
-                    WriteLog("WEEKLY REPORT: Successfully generated report. " & fileName)
-
-                Catch ex As Exception
-                    MsgBox(ex.Message)
-                    WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
-                End Try
-                'Else
-                'MsgBox("No Data! " & dateFrom.ToString & " " & dateTo.ToString)
-            End If
-        Catch ex As Exception
-            WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
-        Finally
-            cmd.Parameters.Clear()
-            conn.Close()
-            conn.Dispose()
-        End Try
-
+                    'Else
+                    'MsgBox("No Data! " & dateFrom.ToString & " " & dateTo.ToString)
+                End If
+            Catch ex As Exception
+                WriteLog("WEEKLY REPORT: Error generating report. " & ex.Message)
+            Finally
+                cmd.Parameters.Clear()
+                conn.Close()
+                conn.Dispose()
+            End Try
+        Else
+            WriteLog("DAILY REPORT: The system is configured to not generate existing files. To change settings go to configuration.")
+        End If
 
         If generated = True Then
             Dim subject As String
@@ -424,7 +556,8 @@ Public Class RedSkyMain
             If weeklyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
                 weeklyLastGeneration = weeklyLastGeneration.AddDays(-7)
             End If
-            UpdateReportConiguration("Weekly", weeklyLastGeneration, nextGeneration)
+            UpdateReportConfiguration("Weekly", weeklyLastGeneration, nextGeneration)
+            ReportHistory("Weekly", referenceCode, MonthName(today.Month, True), referenceNumber, today)
         End If
     End Sub
 
@@ -438,7 +571,7 @@ Public Class RedSkyMain
 
         Dim generated As Boolean = False
         Dim filePath As String = Application.StartupPath & "\Reports\Monthly\"
-        Dim fileName As String = ""
+        Dim fileName As String = "CSI RedSky Monthly Summary " & thisMonth & ".xlsx"
         Dim seats As Integer = 0
 
         If Not Directory.Exists(filePath) Then
@@ -449,6 +582,28 @@ Public Class RedSkyMain
         If dailyFrom.ToString("tt") = "PM" And dailyTo.ToString("tt") = "AM" Then
             nightShift = True
         End If
+
+        Dim templateFilePath As String = Application.StartupPath & "\Templates\"
+        Dim templateFileName As String = "monthly_template.xlsx"
+
+        referenceNumber = lastReportReferenceNumber + 1
+
+        If overWriteExisting = True Then
+            Try
+                If File.Exists(filePath & fileName) Then
+                    File.Delete(filePath & fileName)
+                End If
+            Catch ex As Exception
+                WriteLog("MONTHLY REPORT: Error deleting existing file. " & ex.Message)
+            End Try
+
+        Else
+            fileName = "CSI RedSky Monthly Summary " & thisMonth & " " & referenceNumber & ".xlsx"
+        End If
+
+
+
+        'If overWriteExisting = True Then
 
         Try
             conn.ConnectionString = connectionString
@@ -471,55 +626,101 @@ Public Class RedSkyMain
             reader = cmd.ExecuteReader
             If reader.HasRows Then
                 'MsgBox("Has Data!" & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
-                Try
-                    Dim xlApp As New Excel.Application
-                    Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
-                    Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
-                    xlWorksheet.Name = "Monthly Report"
-                    Dim xlRange As Excel.Range
-                    xlRange = xlWorksheet.Range("A5", "B5")
-                    xlRange.ColumnWidth = 30
-                    xlRange.Interior.Color = Color.LightBlue
-                    xlRange.Font.Bold = True
+                If dailyUseTemplate = True Then
+                    Try
+                        File.Copy(templateFilePath & templateFileName, filePath & fileName)
+                        Dim xlApp As New Excel.Application
+                        Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Open(filePath & fileName)
+                        Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                        Dim xlRange As Excel.Range = xlWorksheet.Range("A1", "G1")
+                        xlRange.Range("F1").Value = "PERIOD: " & thisMonth
+                        xlRange.Range("E5").Value = MonthName(today.Month, True)
+                        xlRange.Range("F5").Value = referenceNumber
+                        xlRange.Range("C5").Value = "REFERENCE # : " & referenceCode
 
-                    xlWorksheet.Range("B2").Value = "PERIOD: " & thisMonth
+                        Dim rowCount As Integer = 9
+                        Dim recordId As Integer = 0
+                        Do While reader.Read
+                            recordId += 1
+                            If rowCount > 9 Then
+                                xlWorksheet.Range("A" & rowCount).EntireRow.Insert()
+                            End If
+                            xlWorksheet.Cells(rowCount, 1) = recordId
+                            xlWorksheet.Cells(rowCount, 2) = If(reader.IsDBNull(0), Nothing, reader.GetValue(0).ToString)
+                            xlWorksheet.Cells(rowCount, 4) = If(reader.IsDBNull(1), Nothing, reader.GetValue(1).ToString)
+                            rowCount += 1
+                            seats += reader.GetValue(1)
+                        Loop
 
-                    xlWorksheet.Range("A5").Value = "LOGIN DATE"
-                    xlWorksheet.Range("B5").Value = "NUMBER OF SEATS"
+                        xlRange.Range("F2").Value = "TOTAL SEATS USED: " & seats.ToString
+                        'xlWorksheet.SaveAs(filePath & fileName)
+                        xlWorkbook.Save()
+                        xlWorkbook.Close()
+                        xlApp.Quit()
 
-                    Dim rowCount As Integer = 6
 
-                    Do While reader.Read
-                        xlWorksheet.Cells(rowCount, 1) = reader.GetValue(0)
-                        xlWorksheet.Cells(rowCount, 2) = reader.GetValue(1)
+                        xlApp = Nothing
+                        xlWorkbook = Nothing
+                        xlWorksheet = Nothing
 
-                        rowCount += 1
-                        seats += reader.GetValue(1)
-                    Loop
+                        generated = True
 
-                    xlWorksheet.Range("B3").Value = "TOTAL SEATS USED: " & seats.ToString
+                        WriteLog("DAILY REPORT: Successfully generated report. " & fileName)
+                    Catch ex As Exception
+                        WriteLog("DAILY REPORT: Error generating report. " & ex.Message)
+                    End Try
+                Else
+                    Try
+                        Dim xlApp As New Excel.Application
+                        Dim xlWorkbook As Excel.Workbook = xlApp.Workbooks.Add
+                        Dim xlWorksheet As Excel.Worksheet = CType(xlWorkbook.Sheets("sheet1"), Excel.Worksheet)
+                        xlWorksheet.Name = "Monthly Report"
+                        Dim xlRange As Excel.Range
+                        xlRange = xlWorksheet.Range("A5", "B5")
+                        xlRange.ColumnWidth = 30
+                        xlRange.Interior.Color = Color.LightBlue
+                        xlRange.Font.Bold = True
 
-                    fileName = "CSI RedSky Monthly Summary " & thisMonth & ".xlsx"
+                        xlWorksheet.Range("B2").Value = "PERIOD: " & thisMonth
 
-                    If File.Exists(filePath & fileName) Then
-                        File.Delete(filePath & fileName)
-                    End If
+                        xlWorksheet.Range("A5").Value = "LOGIN DATE"
+                        xlWorksheet.Range("B5").Value = "NUMBER OF SEATS"
 
-                    xlWorksheet.SaveAs(filePath & fileName)
+                        Dim rowCount As Integer = 6
 
-                    xlWorkbook.Close()
-                    xlApp.Quit()
+                        Do While reader.Read
+                            xlWorksheet.Cells(rowCount, 1) = reader.GetValue(0)
+                            xlWorksheet.Cells(rowCount, 2) = reader.GetValue(1)
 
-                    xlApp = Nothing
-                    xlWorkbook = Nothing
-                    xlWorksheet = Nothing
+                            rowCount += 1
+                            seats += reader.GetValue(1)
+                        Loop
 
-                    generated = True
+                        xlWorksheet.Range("B3").Value = "TOTAL SEATS USED: " & seats.ToString
 
-                    WriteLog("MONTHLY REPORT: Successfully generated report. " & fileName)
-                Catch ex As Exception
-                    WriteLog("MONTHLY REPORT: Error generating report. " & ex.Message)
-                End Try
+                        'fileName = "CSI RedSky Monthly Summary " & thisMonth & ".xlsx"
+
+                        'If File.Exists(filePath & fileName) Then
+                        '    File.Delete(filePath & fileName)
+                        'End If
+
+                        xlWorksheet.SaveAs(filePath & fileName)
+
+                        xlWorkbook.Close()
+                        xlApp.Quit()
+
+                        xlApp = Nothing
+                        xlWorkbook = Nothing
+                        xlWorksheet = Nothing
+
+                        generated = True
+
+                        WriteLog("MONTHLY REPORT: Successfully generated report. " & fileName)
+                    Catch ex As Exception
+                        WriteLog("MONTHLY REPORT: Error generating report. " & ex.Message)
+                    End Try
+                End If
+
                 'Else
                 'MsgBox("No Data! " & firstDayInMonth.ToString & " " & lastDayInMonth.ToString)
             End If
@@ -530,6 +731,13 @@ Public Class RedSkyMain
             conn.Close()
             conn.Dispose()
         End Try
+
+        'Else
+        '    WriteLog("DAILY REPORT: The system is configured to not generate existing files. To change settings go to configuration.")
+        'End If
+
+
+
 
         If generated = True Then
             Dim subject As String
@@ -549,7 +757,8 @@ Public Class RedSkyMain
             If monthlyLastGeneration.ToShortDateString = nextGeneration.ToShortDateString Then
                 monthlyLastGeneration = monthlyLastGeneration.AddMonths(-1)
             End If
-            UpdateReportConiguration("Monthly", monthlyLastGeneration, nextGeneration)
+            UpdateReportConfiguration("Monthly", monthlyLastGeneration, nextGeneration)
+            ReportHistory("Monthly", referenceCode, MonthName(today.Month, True), referenceNumber, today)
         End If
     End Sub
 
@@ -678,10 +887,7 @@ Public Class RedSkyMain
     End Sub
 
     Private Sub btnReloadConfiguration_Click(sender As Object, e As EventArgs) Handles btnReloadConfiguration.Click
-        GetReportConfiguration()
-        GetMailingConfiguration()
-        GetOtherConfiguration()
-        SetRunStatus("STOP")
+        Reload()
         MsgBox("Successfully loaded updated configuration. ", MsgBoxStyle.Information, "Reload Configuration")
     End Sub
 
@@ -712,7 +918,7 @@ Public Class RedSkyMain
         End If
     End Sub
 
-    Private Sub UpdateReportConiguration(reportType As String, lastGeneration As DateTime, nextGeneration As DateTime)
+    Private Sub UpdateReportConfiguration(reportType As String, lastGeneration As DateTime, nextGeneration As DateTime)
         Try
             conn.ConnectionString = connectionString
             conn.Open()
@@ -732,4 +938,52 @@ Public Class RedSkyMain
         End Try
     End Sub
 
+    Private Sub ReportHistory(reportType As String, referenceCode As String, referenceMonth As String, referenceNumber As Integer, dateTimeGenerated As DateTime)
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "INSERT INTO ReportHistory(ReportType, ReferenceCode, ReferenceMonth, ReferenceNumber, DateTimeGenerated) VALUES (@ReportType, @ReferenceCode, @ReferenceMonth, @ReferenceNumber, @DateTimeGenerated)"
+            cmd.Parameters.AddWithValue("@ReportType", reportType)
+            cmd.Parameters.AddWithValue("@ReferenceCode", referenceCode)
+            cmd.Parameters.AddWithValue("@ReferenceMonth", referenceMonth)
+            cmd.Parameters.AddWithValue("@ReferenceNumber", referenceNumber)
+            cmd.Parameters.AddWithValue("@DateTimeGenerated", dateTimeGenerated)
+            cmd.ExecuteNonQuery()
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Successfully inserted report history.")
+        Catch ex As Exception
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Error inserting report history. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        End Try
+    End Sub
+
+    Private Sub GetReportHistory(reportType As String)
+        Try
+            conn.ConnectionString = connectionString
+            conn.Open()
+            cmd.Connection = conn
+            cmd.CommandText = "SELECT ReportType, MAX(Id) as Id FROM ReportHistory where ReportType = @ReportType GROUP BY ReportType"
+            cmd.Parameters.AddWithValue("@ReportType", reportType)
+            'cmd.ExecuteNonQuery()
+            reader = cmd.ExecuteReader
+            If reader.HasRows Then
+                Do While reader.Read
+                    lastReportReferenceNumber = reader.GetInt32(1)
+                Loop
+            Else
+                lastReportReferenceNumber = 0
+            End If
+
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Successfully fetched report history.")
+        Catch ex As Exception
+            WriteLog(reportType.ToString.ToUpper & " REPORT: Error fetching report history. " & ex.Message)
+        Finally
+            cmd.Parameters.Clear()
+            conn.Close()
+            conn.Dispose()
+        End Try
+    End Sub
 End Class
